@@ -1,23 +1,35 @@
-#include "../inc/libmx.h"
+#include "libmx.h"
 
 char *mx_nbr_to_hex(unsigned long nbr) {
-	if(nbr == 0) return "0";
-	int remainder, j = 0, size = 0;
-	int temp = nbr;
-	while (temp != 0) { size++; temp /= 16; }
-	char *hexadecimal = mx_strnew(size);
-	while (nbr != 0) {
-		remainder = nbr % 16;
-		if (remainder < 10) hexadecimal[j] = 48 + remainder;
-		else hexadecimal[j] = 87 + remainder;
-		j++;
-		nbr /= 16;
-	}
-	j--;
-	for (int i = 0; i < j; i++, j--) {
-		char tmp = hexadecimal[i];
-		hexadecimal[i] = hexadecimal[j];
-		hexadecimal[j] = tmp;
-	}
-	return hexadecimal;
+    unsigned long temp = 0;
+    unsigned long quot = nbr;
+    int length = 0;
+    while(quot != 0) {
+        quot = quot/16;
+        length++;
+    }
+    quot = nbr;
+    char *hexdecnum = mx_strnew(length);
+    int i = 0;
+    int j = 0; 
+    while(quot != 0) {
+        temp = quot % 16;
+        if(temp < 10) { 
+			temp=temp + 48; 
+		} 
+		else { 
+			temp = temp + 87; 
+		}
+        j++;
+        quot = quot/16;
+        hexdecnum[i++] = temp;
+    }
+    j--;
+    for (int i = 0; i < j; i++, j--){
+        char temp1 = hexdecnum[i];
+        hexdecnum[i] = hexdecnum[j];
+        hexdecnum[j] = temp1;
+    }
+    
+    return hexdecnum;   
 }

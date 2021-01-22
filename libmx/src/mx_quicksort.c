@@ -1,27 +1,32 @@
-#include "../inc/libmx.h"
+#include "libmx.h"
 
-int mx_quicksort(char **arr, int left, int right){
-    if(!arr) return -1;
-    int count = 0;
-    if (left < right){
-        int first = left, last = right;
-        char *middle = arr[(first + last) / 2];
-        do{
-            while (mx_strlen(arr[first]) < mx_strlen(middle)) first++;
-            while (mx_strlen(arr[last]) > mx_strlen(middle)) last--;
-            if (first <= last){
-                if(mx_strlen(arr[first]) != mx_strlen(arr[last])){
-                    char *tmp = arr[first];
-                    arr[first] = arr[last];
-                    arr[last] = tmp;
-                    count++;
+int mx_quicksort(char **arr, int left, int right) {
+    if (arr == NULL) return -1;
+    int counter = 0;
+
+    if (left < right) {
+        int left_temp = left;
+        int right_temp = right;
+        char *mid = arr[(right_temp + left_temp) / 2];
+
+        while (left_temp <= right_temp) {
+            while (mx_strlen(arr[left_temp]) < mx_strlen(mid)) left_temp++;
+            while (mx_strlen(arr[right_temp]) > mx_strlen(mid)) right_temp--;
+
+            if (left_temp <= right_temp) {
+                if (mx_strlen(arr[right_temp]) != mx_strlen(arr[left_temp])) {
+                    char *temp = arr[left_temp];
+                    arr[left_temp] = arr[right_temp];
+                    arr[right_temp] = temp;
+                    counter++;
                 }
-                first++;
-                last--;
+                right_temp--;
+                left_temp++;
             }
-        } while (first <= last);
-        count += mx_quicksort(arr, left, last);
-        count += mx_quicksort(arr, first, right);
-    }
-    return count;
+        }
+        counter += mx_quicksort(arr, left, right_temp);
+        counter += mx_quicksort(arr, left_temp, right);
+    }    
+    return counter;
 }
+

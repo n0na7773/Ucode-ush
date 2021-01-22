@@ -1,0 +1,348 @@
+#include "ush.h"
+
+void set_path(t_shell *shell) {
+    char *path = NULL;
+    char *dir = getcwd(NULL, 256);
+    shell->kernal = mx_strjoin(dir, "/ush");
+
+    if (!getenv("PATH")) {
+        path = strdup("/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:");
+        path = mx_strjoin_free(path, "/usr/local/munki");
+    }
+    else  {
+        path = strdup(getenv("PATH"));
+    }
+
+    setenv("PATH", path, 1);
+
+    free(dir);
+    free(path);
+}
+
+void set_shell_defaults(t_shell *shell) {
+    char *b_list[19] = {"env", "export", "unset", "echo", "jobs", "fg", "bg",
+                        "cd", "pwd", "which", "exit", "set", "kill", "chdir",
+                        "true", "alias", "declare", "false", NULL};
+    shell->builtin_list = (char **) malloc(sizeof(char *) * 19);
+
+    for (int i = 0; i < 19; i++) {
+        shell->builtin_list[i] = b_list[i]; 
+    }
+    
+    shell->exit_flag = 0;
+    shell->history_count = 0;
+    shell->max_number_job = 1;
+    shell->history_size = 1000;
+    shell->history = (char **)malloc(sizeof(char *) * shell->history_size);
+
+    for (int i = -1; i < MX_JOBS_NUMBER; ++i) {
+        shell->jobs[i] = NULL;
+    }
+    
+    shell->aliases = NULL;
+    shell->functions = NULL;
+
+    mx_init_jobs_stack(shell);
+    set_path(shell);
+}
+
+int options_count(char **args) {
+    int n_options = 0;
+
+    for (int i = 1; args[i]; i++) {
+        n_options++;
+    }
+
+    return n_options;
+}
+
+int mx_set(t_shell *shell, t_process *p) {
+    int n_options = options_count(p->argv);
+    int exit_code = shell->exit_code;
+
+    if (n_options == 0) {
+        for (t_export *q = shell->variables; q; q = q->next) {
+            mx_printstr(q->name);
+            mx_printstr("=");
+            mx_printstr(q->value);
+            mx_printstr("\n");
+        }
+    }
+
+    return exit_code;
+}
+
+int mx_alias(t_shell *shell, t_process *p) {
+    int n_options = options_count(p->argv);
+    int exit_code = shell->exit_code;
+
+    if (n_options == 0) {
+        for (t_export *q = shell->aliases; q; q = q->next) {
+            mx_printstr(q->name);
+            mx_printstr("='");
+            mx_printstr(q->value);
+            mx_printstr("'\n");
+        }
+    }
+    
+    return exit_code;
+}
+
+int mx_declare(t_shell *shell, t_process *p) {
+    int n_options = options_count(p->argv);
+    int exit_code = shell->exit_code;
+
+    if (n_options == 1 && mx_strcmp(p->argv[1], "-f") == 0) {
+        for (t_export *q = shell->functions; q; q = q->next) {
+            mx_printstr(q->name);
+            mx_printstr(" () {\n\t");
+            mx_printstr(q->value);
+            mx_printstr("\n}\n");
+        }
+    }
+
+    return exit_code;
+}
+
+void mx_set_variable(t_export *export, char *name, char *value) {
+    t_export *head_export = export;
+    int flag = 0;
+
+    while (head_export != NULL) {
+        if (strcmp(head_export->name, name) == 0) {
+            flag++;
+            free(head_export->value);
+            head_export->value = strdup(value);
+            break;
+        }
+        head_export = head_export->next;
+    }
+    if (!flag) {
+        mx_push_export(&export, name, value);
+    } 
+}
+
+void mx_set_r_infile(t_shell *shell, t_job *job, t_process *p_process) {
+    t_redir *redir;
+    int j = 0;
+
+    p_process->r_infile = (int *) realloc(p_process->r_infile, sizeof(int) * (p_process->c_input));
+    p_process->r_infile[0] = job->infile;
+
+    if (p_process->redirect) {
+        for (redir = p_process->redirect; redir; redir = redir->next) {
+            if (redir->input_path) {
+                if (redir->redir_delim == R_INPUT) {
+                    shell->redir = mx_red_in(job, p_process, redir->input_path, j);
+                }
+                j++;
+            }
+        }
+        job->infile = p_process->r_infile[0];
+    }
+}
+
+
+int mx_red_in(t_job *job, t_process *p_process, char *input_path, int j) {
+    int status_redir = 0;
+    int fd;
+
+    if ((fd = open(input_path, O_RDONLY, 0666)) < 0) {
+        mx_printerr("ush :");
+        perror(input_path);
+        job->exit_code = 1;
+        status_redir = 1;
+
+        return status_redir;
+    }
+    
+    p_process->r_infile[j] = fd;
+    return status_redir;
+}
+
+int set_flag(int redir_delim) {
+    int flags = 0;
+    
+    if (redir_delim == R_OUTPUT_DBL) {
+        flags = O_WRONLY | O_CREAT;
+    }
+
+    if (redir_delim == R_OUTPUT) {
+        flags = O_WRONLY | O_CREAT | O_TRUNC;
+    }
+    
+    return flags;
+}
+
+int mx_set_redirections(t_shell *shell, t_job *job, t_process *p_process) {
+    mx_count_redir(p_process);
+    shell->redir = 0;
+
+    mx_set_r_infile(shell, job, p_process);
+    mx_set_r_outfile(shell, job, p_process);
+    p_process->errfile = job->errfile;
+
+    if (shell->redir == 1) {
+        shell->exit_code = 1;
+        job->exit_code = 1;
+        mx_set_variable(shell->variables, "?", "1");
+    }
+
+    return shell->redir;
+}
+
+void mx_count_redir(t_process *p_process) {
+    t_redir *r;
+
+    p_process->c_input = 0;
+    p_process->c_output = 0;
+    for (r = p_process->redirect; r; r = r->next) {
+        if (r->redir_delim == R_OUTPUT || r->redir_delim == R_OUTPUT_DBL) {
+            p_process->c_output += 1;
+        }
+
+        if (r->redir_delim == R_INPUT || r->redir_delim == R_INPUT_DBL) {
+            p_process->c_input += 1;
+        }
+        
+    }
+
+    if (p_process->c_output == 0) {
+        p_process->c_output++;
+    }
+    if (p_process->c_input == 0) {
+        p_process->c_input++;
+    }
+    p_process->r_outfile = (int *) realloc(p_process->r_outfile, sizeof(int) * (p_process->c_output));
+}
+
+void mx_set_r_outfile(t_shell *shell, t_job *job, t_process *p_process) {
+    int fd;
+    t_redir *redir;
+    int j = 0;
+    int flags = 0;
+
+    p_process->r_outfile[0] = job->outfile;
+    if (p_process->redirect) {
+        for (redir = p_process->redirect; redir; redir = redir->next) {
+            if (redir->output_path) {
+                flags = set_flag(redir->redir_delim);
+
+                if ((fd = open(redir->output_path, flags, 0666)) < 0) {
+                    mx_printerr("ush :");
+                    perror(redir->output_path);
+                    shell->redir = 1;
+                    continue;
+                }
+                
+                p_process->r_outfile[j] = fd;
+                lseek(p_process->r_outfile[j], 0, SEEK_END);
+                j++;
+            }
+        }
+    }
+    job->outfile = p_process->r_outfile[0];
+}
+
+/*static char *strdup_from(char *str, int index) {
+    for (int i = 0; i <= index; i++) {
+        str++;
+    }
+    return strdup(str);
+}*/
+
+static void get_data (char *arg, char **name, char **value) {
+    int idx = mx_get_char_index(arg,'=');
+
+    *value = strdup_from(arg,idx);
+    *name = strndup(arg,idx);
+}
+
+void mx_export_value(t_export *export, char *name, char *value) {
+    t_export *head = export;
+
+    while (head != NULL) {
+        if (strcmp(head->name, name) == 0) {
+            if (head->value) {
+                free(head->value);
+            }
+
+            head->value = strdup(value);
+            setenv(name, value, 1);
+            break;
+        }
+        head = head->next;
+    }
+}
+
+int mx_set_parametr(char **args, t_shell *shell) {
+    char *name;
+    char *value;
+
+    for (int i = 0; args[i] != NULL; i++) {
+        name = NULL;
+        value = NULL;
+        get_data(args[i], &name, &value);
+        if (value != NULL && name != NULL) {
+            mx_set_variable(shell->variables, name, value);
+            mx_export_value(shell->exported, name, value);
+        }
+
+        if (value) {
+            free(value);
+        }
+        if (name) {
+            free(name);
+        }
+        
+    }
+    return 0;
+}
+
+t_export *mx_set_variables() {
+    extern char** environ;
+    t_export *variables = NULL;;
+
+    for (size_t i = 0; environ[i] != NULL; i++) {
+        int idx = mx_get_char_index(environ[i],'=');
+        char *name = strndup(environ[i],idx);
+        char *value = mx_strdup_from(environ[i],idx);
+
+        mx_push_export(&variables, name, value);
+
+        if (value) {
+            free(value);
+        }
+        if (name) {
+            free(name);
+        }
+        
+    }
+
+    mx_push_export(&variables, "?", "0");
+    return variables;
+}
+
+t_export *mx_set_export() {
+    t_export *export = NULL;
+    extern char** environ;
+
+    for (size_t i = 0; environ[i] != NULL; i++) {
+        int idx = mx_get_char_index(environ[i],'=');
+        char *name = strndup(environ[i],idx);
+        char *value = mx_strdup_from(environ[i],idx);
+
+        if(strcmp(name, "_") != 0) {
+            mx_push_export(&export, name, value); 
+        }
+
+        if (value) {
+            free(value); 
+        }
+        if (name) {
+            free(name);
+        }   
+    }
+    
+    return export;
+}

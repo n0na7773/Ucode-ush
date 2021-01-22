@@ -1,5 +1,8 @@
-#include "../inc/libmx.h"
+#include "libmx.h"
 
-bool mx_islower(int c){
-    return(c >= 'a' && c <= 'z' ? 1 : 0);
+bool mx_islower(int c) {
+    if (97 <= c && c <= 122) {
+        return 1;
+    }
+    return 0;
 }

@@ -1,6 +1,6 @@
-NAME = ush
+NAME	=	ush
 
-CFLG = -std=c11 $(addprefix -W, all extra error pedantic) -g
+CFLG	=	-std=c11 $(addprefix -W, all extra error pedantic) -g
 
 SRC_DIR	= src
 INC_DIR	= inc
@@ -14,7 +14,7 @@ LMX_DIR	= libmx
 LMX_A:=	$(LMX_DIR)/libmx.a
 LMX_INC:= $(LMX_DIR)/inc
 
-all: install
+all: install clean
 
 install: $(LMX_A) $(NAME)
 
@@ -33,19 +33,16 @@ $(OBJ_DIR):
 
 $(LMX_A):
 	@make -sC $(LMX_DIR)
-	@printf "\r\33[2Klibmx \033[32;1mcreated\033[0m\n"
-
+	
 clean:
 	@rm -rf $(OBJ_DIR)
 	@make clean -sC $(LMX_DIR)
-	@printf "$(OBJ_DIR)-dir in $(LMX_DIR) \033[31;1mdeleted\033[0m\n"
-	@printf "$(OBJ_DIR)-dir in $(NAME) \033[31;1mdeleted\033[0m\n"
+	@printf "$(OBJ_DIR) in $(NAME) \033[31;1mdeleted\033[0m\n"
 
 uninstall:
 	@make -sC $(LMX_DIR) $@
 	@rm -rf $(OBJ_DIR)
 	@rm -rf $(NAME)
-	@printf "libmx \033[31;1muninstalled\033[0m\n"
 	@printf "$(NAME) \033[31;1muninstalled\033[0m\n"
 
 reinstall: uninstall all

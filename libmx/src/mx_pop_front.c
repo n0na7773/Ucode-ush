@@ -1,14 +1,12 @@
-#include "../inc/libmx.h"
+#include "libmx.h"
 
-void mx_pop_front(t_list **head){
-    if(*head == NULL) return;
-    if((*head)->next == NULL){
-        free(*head);
-        *head = NULL;
+void mx_pop_front(t_list **head) {
+    if (head == NULL || *head == NULL) {
         return;
     }
-    t_list *new_head = (*head)->next;
+    t_list *node = *head;
+    node = node->next;
     free(*head);
     (*head) = NULL;
-    *head = new_head;
+    *head = node;
 }

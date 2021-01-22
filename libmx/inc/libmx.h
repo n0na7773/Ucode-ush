@@ -1,90 +1,149 @@
 #pragma once
-#ifndef LIBMX_H
-#define LIBMX_H
+#ifndef HEADER
+#define HEADER
 
+#include <stdbool.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <stdbool.h>
 #include <fcntl.h>
 #include <wchar.h>
-#include <locale.h>
-#include <malloc/malloc.h>
+#include <malloc/malloc.h> //mac malloc_size
+//#include <malloc.h>//ubuntu malloc_usable_size
+#include "hex_to_nbr.h"
+#include "nbr_to_hex.h"
 
-typedef struct s_list { 
+#define RESET "\x1B[0m"
+
+typedef struct s_list {
     void *data;
-    struct s_list *next; 
-}              t_list;
+    struct s_list *next;
+}   t_list;
 
-//Utils Pack
-void mx_printchar(char c);//100
-void mx_print_unicode(wchar_t c);//100
-void mx_printstr(const char *s);//100
-void mx_print_strarr(char **arr, const char *delim);//100
-void mx_printint(int n);//100
-double mx_pow(double n, unsigned int pow);//100
-int mx_sqrt(int x);//100
-char *mx_nbr_to_hex(unsigned long nbr);//100
-unsigned long mx_hex_to_nbr(const char *hex);//100
-char *mx_itoa(int number);//100
-void mx_foreach(int *arr, int size, void (*f)(int));//100
-int mx_binary_search(char **arr, int size, const char *s, int *count);//100
-int mx_bubble_sort(char **arr, int size);//100
-int mx_quicksort(char **arr, int left, int right);//100
+void mx_print_color(char *, char *);
 
-//String Pack
-int mx_strlen(const char *s);//100
-void mx_swap_char(char *s1, char *s2);//100
-void mx_str_reverse(char *s);//100
-void mx_strdel(char **str);//100
-void mx_del_strarr(char ***arr);//100
-int mx_get_char_index(const char *str, char c);//100
-char *mx_strdup(const char *s1);//100
-char *mx_strndup(const char *s1, size_t n);//100
-char *mx_strcpy(char *dst, const char *src);//100
-char *mx_strncpy(char *dst, const char *src, int len);//100
-int mx_strcmp(const char *s1, const char *s2);//100
-char *mx_strcat(char *restrict s1, const char *restrict s2);//100
-char *mx_strstr(const char *haystack, const char *needle);//100
-int mx_get_substr_index(const char *str, const char *sub);//100
-int mx_count_substr(const char *str, const char *sub);//100
-int mx_count_words(const char *str, char c);//100
-char *mx_strnew(const int size);//100
-char *mx_strtrim(const char *str);//100
-char *mx_del_extra_spaces(const char *str);//100
-char **mx_strsplit(const char *s, char c);//50 changed
-char *mx_strjoin(const char *s1, const char *s2);//75
-char *mx_file_to_str(const char *file);//100
-char *mx_replace_substr(const char *str, const char *sub, const char *replace);//100
-int mx_read_line(char **lineptr, size_t buf_size, char delim, const int fd);//20 this shit annoys me
+bool mx_isdelim (char , char *);
 
-//Memory Pack
-void *mx_memset(void *b, int c, size_t len);//100
-void *mx_memcpy(void *restrict dst, const void *restrict src, size_t n);//100
-void *mx_memccpy(void *restrict dst, const void *restrict src, int c, size_t n);//100
-int mx_memcmp(const void *s1, const void *s2, size_t n);//100
-void *mx_memchr(const void *s, int c, size_t n);//100
-void *mx_memrchr(const void *s, int c, size_t n);//100
-void *mx_memmem(const void *big, size_t big_len, const void *little, size_t little_len);//80
-void *mx_memmove(void *dst, const void *src, size_t len);//100
-void *mx_realloc(void *ptr, size_t size);//100
+void mx_printerr(const char *);
 
-//List Pack
-t_list *mx_create_node(void *data);//100
-void mx_push_front(t_list **list, void *data);//100
-void mx_push_back(t_list **list, void *data);//100
-void mx_pop_front(t_list **head);//60
-void mx_pop_back(t_list **head);//60
-int mx_list_size(t_list *list);//100
-t_list *mx_sort_list(t_list *lst, bool (*cmp)(void *, void *));//100
+int mx_strlen(const char *);
 
-//NOT mentioned in pdf
-bool mx_isdigit(int c);
-bool mx_isalpha(int c);
-bool mx_islower(int c);
-bool mx_isupper(int c);
-bool mx_isspace(char c);
-char *mx_strchr(const char *s, int c);
-int mx_strncmp(const char *s1, const char *s2, int n);
+void mx_printstr(const char *);
+
+void mx_printchar(char);
+
+void mx_printint(int);
+
+double mx_pow(double, unsigned int);
+
+int mx_sqrt(int);
+
+char *mx_strnew(const int);
+
+char *mx_nbr_to_hex(unsigned long);
+
+unsigned long mx_hex_to_nbr(const char *);
+
+void mx_foreach(const int *arr, int size, void (*f)(int));
+
+int mx_strncmp(const char *, const char *, int);
+
+int mx_binary_search(char **, int , const char *, int *);
+
+int mx_bubble_sort(char **, int);
+
+int mx_strcmp(const char *, const char *);
+
+void mx_swap_char(char *, char *);
+
+void mx_str_reverse(char *);
+
+char *mx_itoa(int);
+
+char *mx_strcpy(char *, const char *);
+
+void mx_strdel(char **);
+
+char *mx_strdup(const char *);
+
+char *mx_strndup(const char *, size_t);
+
+char *mx_strncpy(char *, const char *, int);
+
+char *mx_strcat(char *, const char *);
+
+char *mx_strstr(const char *, const char *);
+
+int mx_count_substr(const char *, const char *);
+
+int mx_count_words(const char *, char);
+
+char *mx_strtrim(const char *str);
+
+bool mx_islower(int);
+
+bool mx_isupper(int);
+
+bool mx_isdigit(int);
+
+bool mx_isalpha(int);
+
+bool mx_isspace(char);
+
+char *mx_strchr(const char *, int);
+
+char **mx_strsplit(char const *, char);
+
+char *mx_strjoin(char const *, char const *);
+
+char *mx_file_to_str(const char *);
+
+void mx_del_strarr(char ***);
+
+int mx_get_char_index(const char *, char);
+
+int mx_get_substr_index(const char *, const char *);
+
+char *mx_del_extra_spaces(const char *);
+
+int mx_read_line(char **, size_t, char, const int);
+
+void *mx_memset(void *, int, size_t);
+
+void *mx_memcpy(void *restrict, const void *restrict, size_t);
+
+void *mx_memccpy(void *restrict, const void *restrict, int, size_t);
+
+int mx_memcmp(const void *, const void *, size_t);
+
+void *mx_memchr(const void *, int , size_t);
+
+void *mx_memrchr(const void *, int, size_t);
+
+void *mx_memmem(const void *, size_t , const void *, size_t);
+
+void *mx_memmove(void *, const void *, size_t);
+
+void *mx_realloc(void *, size_t);
+
+t_list *mx_create_node(void *);
+
+void mx_push_front(t_list **, void *);
+
+void mx_push_back(t_list **, void *);
+
+void mx_pop_front(t_list **);
+
+void mx_pop_back(t_list **);
+
+void mx_pop_back(t_list **);
+
+int mx_list_size(t_list *);
+
+t_list *mx_sort_list(t_list *, bool (*)(void *, void *));
+
+void mx_print_unicode(wchar_t);
+
+void mx_print_unicode(wchar_t);
 
 #endif

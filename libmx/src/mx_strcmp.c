@@ -1,11 +1,12 @@
-#include "../inc/libmx.h"
+#include "libmx.h"
 
-int mx_strcmp(const char *s1, const char *s2){
-    char c1, c2;
-    do{
-        c1 = *s1++;
-        c2 = *s2++;
-        if(c1 == '\0') return c1 - c2;
-    } while (c1 == c2);
-    return c1 - c2;
+int mx_strcmp(const char *s1, const char *s2) {
+    int i = 0;
+    while(s1[i] == s2[i]) {
+        if (s2[i] == '\0' && s1[i] == '\0')
+            return 0;
+        i++;
+    }
+    return (s1[i] - s2[i]);
 }
+
