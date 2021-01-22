@@ -306,6 +306,54 @@ typedef struct _prompt {
     char    *kernal;
 }             Prompt;
 
+//mx_do_bg.c
+
+//mx_do_cd.c
+
+//mx_do_chdir.c
+
+//mx_do_echo.c
+
+//mx_do_env.c
+
+//mx_do_exit.c
+
+//mx_do_export.c
+
+//mx_do_fg.c
+
+//mx_do_kil.c
+
+//mx_do_pwd.c
+
+//mx_do_unset.c
+
+//mx_do_which.c
+
+//mx_error.c
+
+//mx_get.c
+
+//mx_init_prompt.c
+
+//mx_jobs.c
+
+//mx_loop.c
+
+//mx_parser.c
+
+//mx_print.c
+
+//mx_process.c
+
+//mx_redirect.c
+
+//mx_set.c
+
+//mx_str_funcs.c
+
+//mx_substring.c
+
 // Abstract Syntax
 Abstract **mx_ast_creation(char *, Prompt *);
 Abstract *mx_ush_parsed_line(Abstract *, char *, Prompt *, int);
@@ -485,23 +533,14 @@ char *mx_run_sub_shell(char *, Prompt *);
 char *mx_subs_output(char **);
 
 void mx_print_fd(Process  *);
-
 char **mx_strdup_arr(char **);
-
 void mx_print_strarr_in_line(char **, const char *);
-
 int mx_strlen_arr(char **);
-
 char *mx_strjoin_free(char *, char const *);
-
 bool mx_check_allocation_error(const void *);
-
 void mx_printerr_red(char *);
-
 void mx_print_color(char *, char *);
-
 int mx_get_char_index_reverse(const char *, char );
-
 void mx_clear_list(t_list **);
 
 //Cd
