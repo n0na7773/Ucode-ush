@@ -24,8 +24,8 @@ char *get_variable_dollar(char *s, int *var_len) {
     return variable;
 }
 
-char *get_value(char *var, t_export *variables) {
-    for (t_export *q = variables; q; q = q->next) {
+char *get_value(char *var, Export *variables) {
+    for (Export *q = variables; q; q = q->next) {
         if (mx_strcmp(var, q->name) == 0) {
             return q->value;
         }
@@ -33,7 +33,7 @@ char *get_value(char *var, t_export *variables) {
     return NULL;
 }
 
-char *expantion_dillar(char *s, t_export *variables, int pos) {
+char *expantion_dillar(char *s, Export *variables, int pos) {
     char *value;
     int v_len = 0;
     char *result = NULL;
@@ -56,7 +56,7 @@ char *expantion_dillar(char *s, t_export *variables, int pos) {
     return result;
 }
 
-char *exp_inside_dblq(char *s, t_export *variables, int *i, int *k) {
+char *exp_inside_dblq(char *s, Export *variables, int *i, int *k) {
     char *result = NULL;
     int j = 0;
     int pos = 0;
@@ -78,7 +78,7 @@ char *exp_inside_dblq(char *s, t_export *variables, int *i, int *k) {
     return result;
 }
 
-char *mx_substr_dollar(char *s, t_export *variables) {
+char *mx_substr_dollar(char *s, Export *variables) {
     int pos = 0;
     int k = 0;
     char *result = s;
@@ -101,11 +101,11 @@ char *mx_substr_dollar(char *s, t_export *variables) {
     return result;
 }
 
-char *get_res(char *var, t_export *variables) {
+char *get_res(char *var, Export *variables) {
     char *res = NULL;
     struct passwd *pw = getpwuid(getuid());
 
-    for (t_export *q = variables; q; q = q->next)
+    for (Export *q = variables; q; q = q->next)
         if (mx_strcmp(var, q->name) == 0)
             res = q->value;
     if (!res) {
@@ -134,7 +134,7 @@ char *get_prefix(char *s, int *sleshpos) {
     return prefix;
 }
 
-char *expantion_tilde(char *s, t_export *var) {
+char *expantion_tilde(char *s, Export *var) {
     char *res = NULL;
     int sleshpos;
     char *prefix = get_prefix(s, &sleshpos);
@@ -155,7 +155,7 @@ char *expantion_tilde(char *s, t_export *var) {
     return res;
 }
 
-char *mx_subst_tilde(char *s, t_export *variables) {
+char *mx_subst_tilde(char *s, Export *variables) {
     char *res = NULL;
 
     if (!s || !*s)
@@ -229,7 +229,7 @@ char *get_sub_str(char *s, int *lenght) {
     return sub_str;
 }
 
-char *expantion_command(char *s, int pos, t_shell *shell) {
+char *expantion_command(char *s, int pos, Prompt *shell) {
     char *sub_str = NULL;
     char *res = mx_strndup(s, pos);
     int len = 0;
@@ -248,7 +248,7 @@ char *expantion_command(char *s, int pos, t_shell *shell) {
     return res;
 }
 
-char *mx_sub_str_command(char *s, t_shell *shell) {
+char *mx_sub_str_command(char *s, Prompt *shell) {
     int pos = 0;
     char *result = s;
 

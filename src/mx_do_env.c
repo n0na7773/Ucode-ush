@@ -13,7 +13,7 @@ char *get_parameter(char **args, int *indx, int j_index, int *option_n) {
     return param;
 }
 
-int add_parameter(char *param, t_export **env_params, char option) {
+int add_parameter(char *param, Export **env_params, char option) {
     char *tmp_option = malloc(2*sizeof(char));;
 
     if (param) {
@@ -35,7 +35,7 @@ int add_parameter(char *param, t_export **env_params, char option) {
     }
 }
 
-int mx_add_option(char **args, int *i, int *option_n, t_env_builtin *env) {
+int mx_add_option(char **args, int *i, int *option_n, BuiltIn *env) {
     int flag = 1;
     char *parametr = NULL;
     int exit_index = 0;
@@ -54,7 +54,7 @@ int mx_add_option(char **args, int *i, int *option_n, t_env_builtin *env) {
     return exit_index;
 }
 
-int mx_count_env_options(char **args, t_env_builtin *env) {
+int mx_count_env_options(char **args, BuiltIn *env) {
     int n_options = 0;
 
     for (int i = 1; args[i] != NULL; i++) {
@@ -104,16 +104,16 @@ static int env_option_num(char **args, int n_all) {
     return n_args;
 }
 
-static void env_print(t_export *env_list) {
-    t_export *head = env_list;
+static void env_print(Export *env_list) {
+    Export *head = env_list;
     while (head != NULL) {
         printf("%s=%s\n", head->name, head->value);
         head = head->next;
     }
 }
 
-static t_env_builtin *init_env (t_process *p) {
-    t_env_builtin *env = (t_env_builtin *)malloc(sizeof(t_env_builtin));
+static BuiltIn *init_env (Process *p) {
+    BuiltIn *env = (BuiltIn *)malloc(sizeof(BuiltIn));
 
     env->env_params = NULL;
     env->env_list = NULL;
@@ -127,8 +127,8 @@ static t_env_builtin *init_env (t_process *p) {
     return env;
 }
 
-int mx_env(t_shell *shell, t_process *p) {
-    t_env_builtin *env = init_env(p);
+int mx_env(Prompt *shell, Process *p) {
+    BuiltIn *env = init_env(p);
     int exit_point = 0;
 
     mx_set_data(env, p->argv);
@@ -145,7 +145,7 @@ int mx_env(t_shell *shell, t_process *p) {
     return exit_point;
 }
 
-void env_get_data(int i, char **args, t_env_builtin *env) {
+void env_get_data(int i, char **args, BuiltIn *env) {
     int idx = mx_get_char_index(args[i],'=');
     char *name = strndup(args[i],idx);
     char *value = mx_strdup_from(args[i],idx);
@@ -155,8 +155,8 @@ void env_get_data(int i, char **args, t_env_builtin *env) {
     free(value);
 }
 
-void env_delete_name(t_export **list, char *arg) {
-    t_export *head = *list;
+void env_delete_name(Export **list, char *arg) {
+    Export *head = *list;
 
     if (head != NULL && strcmp(head->name, arg) == 0) {
         *list = (*list)->next;
@@ -176,8 +176,8 @@ void env_delete_name(t_export **list, char *arg) {
     }
 }
 
-void env_get_params (t_export *env_params, t_export *env_list, t_env_builtin *env) {
-    t_export *head = env_params;
+void env_get_params (Export *env_params, Export *env_list, BuiltIn *env) {
+    Export *head = env_params;
 
     while (head != NULL) {
         if (strcmp(head->name, "u") == 0) {
@@ -191,7 +191,7 @@ void env_get_params (t_export *env_params, t_export *env_list, t_env_builtin *en
     }
 }
 
-void mx_set_data(t_env_builtin *env, char *args[]) {
+void mx_set_data(BuiltIn *env, char *args[]) {
     extern char** environ;
     for (int i = 0; environ[i] != NULL; i++) {
         if (!env->env_options.i) env_get_data(i, environ, env);
@@ -202,7 +202,7 @@ void mx_set_data(t_env_builtin *env, char *args[]) {
     }
 }
 
-char **env_get_args(t_process *process, int start) {
+char **env_get_args(Process *process, int start) {
     char **args_arr = (char **)malloc(sizeof(char *) * 256);
     int tmp_start = start;
 
@@ -215,9 +215,9 @@ char **env_get_args(t_process *process, int start) {
     return args_arr;
 }
 
-char **get_env_arr(t_export *env_list) {
+char **get_env_arr(Export *env_list) {
     char **env_arr = (char **)malloc(sizeof(char *) * 1024);
-    t_export *head = env_list;
+    Export *head = env_list;
     int i = 0;
     char *str = NULL;
 
@@ -234,7 +234,7 @@ char **get_env_arr(t_export *env_list) {
     return env_arr;
 }
 
-void mx_launch_command( t_process *process, t_env_builtin *env, int *exit_code) {
+void mx_launch_command( Process *process, BuiltIn *env, int *exit_code) {
     char **args_arr = env_get_args(process, env->n_options + env->n_variables + 1);
     char **env_arr = get_env_arr(env->env_list);
 

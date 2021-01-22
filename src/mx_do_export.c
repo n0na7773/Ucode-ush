@@ -6,8 +6,8 @@ int export_count_args(char **args, int option_num) {
     return args_num;
 }
 
-static void print_export(t_export *export) {
-    t_export *head_exp = export;
+static void print_export(Export *export) {
+    Export *head_exp = export;
 
     while (head_exp != NULL) {
         if (strncmp(head_exp->name,"BASH_FUNC_",10) != 0) {
@@ -24,7 +24,7 @@ void mx_clear_data(char *name, char *value) {
     if(value) free(value);
 }
 
-int mx_export(t_shell *shell, t_process *proc) {
+int mx_export(Prompt *shell, Process *proc) {
     int option_num = mx_count_options(proc->argv, "proc", "export", " [name[=value] ...] or export -proc");
     int args_num = export_count_args(proc->argv, option_num);
     int a = 0;
@@ -64,9 +64,9 @@ void print_export_error(char *arg, int *exit_index) {
     *exit_index = 1;
 }
 
-static void export_value(t_export *export, char *name, char *value) {
+static void export_value(Export *export, char *name, char *value) {
     int flag = 0;
-    t_export *head_exp = export;
+    Export *head_exp = export;
 
     while (head_exp != NULL) {
         if (strcmp(head_exp->name, name) == 0) {
@@ -80,7 +80,7 @@ static void export_value(t_export *export, char *name, char *value) {
     if (!flag) mx_push_export(&export, name, value);
 }
 
-static void get_data (char *arg, char **name, char **value, t_export *var) {
+static void get_data (char *arg, char **name, char **value, Export *var) {
     int indx = mx_get_char_index(arg,'=');
 
     if (indx < 0){
@@ -90,7 +90,7 @@ static void get_data (char *arg, char **name, char **value, t_export *var) {
         *value = mx_strdup_from(arg,indx);
     }
     if (*value == NULL) {
-        t_export *head_exp = var;
+        Export *head_exp = var;
         while (head_exp != NULL) {
             if (strcmp(head_exp->name, *name) == 0) {
                 *value = strdup(head_exp->value);
@@ -101,7 +101,7 @@ static void get_data (char *arg, char **name, char **value, t_export *var) {
     }
 }
 
-void mx_export_or_error(char *arg, t_export *export, t_export *var, int *exit_index) {
+void mx_export_or_error(char *arg, Export *export, Export *var, int *exit_index) {
     int flag = check_identifier(arg);
 
     if (flag){
@@ -118,8 +118,8 @@ void mx_export_or_error(char *arg, t_export *export, t_export *var, int *exit_in
     }
 }
 
-static t_export *create_node(void *name, void *value) {
-    t_export *node =  (t_export *)malloc(sizeof(t_export));
+static Export *create_node(void *name, void *value) {
+    Export *node =  (Export *)malloc(sizeof(Export));
 
     node->name = strdup(name);
     if(!value)
@@ -130,9 +130,9 @@ static t_export *create_node(void *name, void *value) {
     return node;
 }
 
-void mx_push_export(t_export **list, void *name, void *value) {
-    t_export *temp;
-    t_export *export_p;
+void mx_push_export(Export **list, void *name, void *value) {
+    Export *temp;
+    Export *export_p;
 
     if (!list) {
         return;

@@ -1,6 +1,6 @@
 #include "ush.h"
 
-void set_path(t_shell *shell) {
+void set_path(Prompt *shell) {
     char *path = NULL;
     char *dir = getcwd(NULL, 256);
     shell->kernal = mx_strjoin(dir, "/ush");
@@ -19,7 +19,7 @@ void set_path(t_shell *shell) {
     free(path);
 }
 
-void set_shell_defaults(t_shell *shell) {
+void set_shell_defaults(Prompt *shell) {
     char *b_list[19] = {"env", "export", "unset", "echo", "jobs", "fg", "bg",
                         "cd", "pwd", "which", "exit", "set", "kill", "chdir",
                         "true", "alias", "declare", "false", NULL};
@@ -64,9 +64,9 @@ char *get_pwd() {
     return pwd;
 }
 
-t_shell *mx_init_shell(int argc, char **argv) {
+Prompt *init_ush(int argc, char **argv) {
     char *shlvl;
-    t_shell *shell = (t_shell *) malloc(sizeof(t_shell));
+    Prompt *shell = (Prompt *) malloc(sizeof(Prompt));
 
     set_shell_defaults(shell);
     shell->argv = argv;
@@ -88,7 +88,7 @@ t_shell *mx_init_shell(int argc, char **argv) {
     return shell;
 }
 
-void shell_grp_help(t_shell *shell, pid_t shell_pgid) {
+void shell_grp_help(Prompt *shell, pid_t shell_pgid) {
     shell_pgid = getpid();
     if (setpgid(shell_pgid, shell_pgid) < 0) {
         perror("Couldn't put the shell in its own process group");
@@ -98,7 +98,7 @@ void shell_grp_help(t_shell *shell, pid_t shell_pgid) {
     shell->shell_pgid = shell_pgid;
 }
 
-void mx_set_shell_grp(t_shell *shell) {
+void mx_set_shell_grp(Prompt *shell) {
     pid_t shell_pgid;
     int shell_terminal = STDIN_FILENO;
     int shell_is_interactive = isatty(shell_terminal);
@@ -130,7 +130,7 @@ static void k_backscape(int *position, char *line) {
     }
 }
 
-static void k_up(t_shell *shell, char **line, int *position) {
+static void k_up(Prompt *shell, char **line, int *position) {
     if (shell->history[shell->history_index - 1] && shell->history_index > 0) {
         free(*line);
         *line = NULL;
@@ -141,7 +141,7 @@ static void k_up(t_shell *shell, char **line, int *position) {
     }
 }
 
-static void k_down(t_shell *shell, char **line, int *position) {
+static void k_down(Prompt *shell, char **line, int *position) {
     if (shell->history[shell->history_index + 1] && shell->history_index < shell->history_count) {
         free(*line);
         *line = NULL;
@@ -152,7 +152,7 @@ static void k_down(t_shell *shell, char **line, int *position) {
     }
 }
 
-void mx_edit_command(int keycode, int *position, char **line, t_shell *shell) {
+void mx_edit_command(int keycode, int *position, char **line, Prompt *shell) {
     if (keycode == MX_K_LEFT){
         if(*position > 0) (*position)--;
     } else if (keycode == MX_K_RIGHT) {
@@ -174,7 +174,7 @@ void mx_edit_command(int keycode, int *position, char **line, t_shell *shell) {
     }
 }
 
-int mx_builtin_commands_idex(t_shell *shell, char *command) {
+int mx_builtin_commands_idex(Prompt *shell, char *command) {
     int i = 0;
 
     for (i = 0; shell->builtin_list[i] != NULL; i++) {
@@ -196,7 +196,7 @@ int mx_get_flag(char **args) {
     return flag;
 }
 
-void mx_sheck_exit(t_shell *shell, t_process *p) {
+void mx_sheck_exit(Prompt *shell, Process *p) {
     mx_set_variable(shell->variables, "_", p->argv[0]);
     setenv("_", p->argv[0], 1);
     if (shell->exit_flag == 1 && !(p->type == 10))
@@ -215,13 +215,13 @@ char *mx_get_shlvl(void) {
     shlvl = mx_itoa(lvl);
     return shlvl;
 }
-static void exit_ush(t_shell *shell) {
+static void exit_ush(Prompt *shell) {
     printf("exit\n");
     mx_clear_all(shell);
     exit(EXIT_SUCCESS);
 }
 
-void mx_exec_signal(int keycode, char **line, int *position, t_shell *shell) {
+void mx_exec_signal(int keycode, char **line, int *position, Prompt *shell) {
     if (keycode == MX_CTRL_C)
         for (int i = 0; i < mx_strlen(*line); i++) *line[i] = '\0';
 
@@ -266,7 +266,7 @@ void mx_exec_signal(int keycode, char **line, int *position, t_shell *shell) {
     }
 }
 
-void buildin_fork(t_shell *shell, int job_id, int (*builtin_functions[]) (t_shell *shell, t_process *p_process), t_process *p_process) {
+void buildin_fork(Prompt *shell, int job_id, int (*builtin_functions[]) (Prompt *shell, Process *p_process), Process *p_process) {
     pid_t child_pid = fork();
 
     p_process->pid = child_pid;
@@ -292,7 +292,7 @@ void buildin_fork(t_shell *shell, int job_id, int (*builtin_functions[]) (t_shel
     }
 }
 
-void buildin_std_ex(t_shell *shell, int (*builtin_functions[]) (t_shell *shell, t_process *p_process), t_process *p_process) {
+void buildin_std_ex(Prompt *shell, int (*builtin_functions[]) (Prompt *shell, Process *p_process), Process *p_process) {
     int defoult;
 
     if (p_process->output_path) {
@@ -316,8 +316,8 @@ void buildin_std_ex(t_shell *shell, int (*builtin_functions[]) (t_shell *shell, 
     }
 }
 
-int mx_launch_builtin(t_shell *shell, t_process *p_process, int job_id) {
-    int (*builtin_functions[])(t_shell *shell, t_process *p_process) =
+int mx_launch_builtin(Prompt *shell, Process *p_process, int job_id) {
+    int (*builtin_functions[])(Prompt *shell, Process *p_process) =
          {&mx_env, &mx_export, &mx_unset, &mx_echo, &mx_jobs, &mx_fg,
           &mx_bg, &mx_cd, &mx_pwd, &mx_which, &mx_exit, &mx_set,
           &mx_kill, &mx_chdir, &mx_false, &mx_alias, &mx_declare, 
@@ -334,7 +334,7 @@ int mx_launch_builtin(t_shell *shell, t_process *p_process, int job_id) {
     return p_process->exit_code;
 }
 
-void mx_pgid(t_shell *shell, int job_id, int child_pid) {
+void mx_pgid(Prompt *shell, int job_id, int child_pid) {
     if (shell->jobs[job_id]->pgid == 0) {
         shell->jobs[job_id]->pgid = child_pid;
     }
@@ -353,8 +353,8 @@ void mx_pgid(t_shell *shell, int job_id, int child_pid) {
     signal(SIGPIPE, mx_sig_h);
 }
 
-char *get_variable(t_shell *shell, char *target) {
-    t_export *export_head = shell->variables;
+char *get_variable(Prompt *shell, char *target) {
+    Export *export_head = shell->variables;
 
     while (export_head != NULL) {
         if (strcmp(export_head->name, target) == 0) {
@@ -366,7 +366,7 @@ char *get_variable(t_shell *shell, char *target) {
     return NULL;
 }
 
-void customize(t_shell *shell) {
+void customize(Prompt *shell) {
     char **arr_char = NULL;
     char *info_char = NULL;
     int count = 0;
@@ -390,7 +390,7 @@ void customize(t_shell *shell) {
     free(info_char);
 }
 
-void mx_print_prompt(t_shell *shell) {
+void mx_print_prompt(Prompt *shell) {
     printf("%s", "\x1B[37m");
 
     if (!shell->prompt_status) {
@@ -408,7 +408,7 @@ void mx_print_prompt(t_shell *shell) {
     fflush (NULL);
 }
 
-void mx_edit_prompt(t_shell *shell) {
+void mx_edit_prompt(Prompt *shell) {
     if (shell->prompt) {
         free(shell->prompt);
     }
@@ -425,13 +425,13 @@ void mx_edit_prompt(t_shell *shell) {
     }
 }
 
-void mx_termios_restore(t_shell *shell) {
+void mx_termios_restore(Prompt *shell) {
     if (shell->custom_terminal == TRUE) {
         tcsetattr(STDIN_FILENO, TCSANOW, &shell->t_original);
     }
 }
 
-void mx_termios_save(t_shell *shell) {
+void mx_termios_save(Prompt *shell) {
     if (tcgetattr(STDIN_FILENO, &shell->t_original) == -1) {
         mx_printerr("tcgetattr() failed");
         exit(MX_EXIT_FAILURE);
@@ -460,7 +460,7 @@ static bool check_subsut_result(char **result, char **args, int *i) {
     return false;
 }
 
-static char **func_alias_tokens(char *line, t_shell *shell) {
+static char **func_alias_tokens(char *line, Prompt *shell) {
     char **args = NULL;
 
     if (mx_strstr(line, "()")) {
@@ -476,7 +476,7 @@ static char **func_alias_tokens(char *line, t_shell *shell) {
     return args;
 }
 
-static char **substitutions(char **args, t_shell *shell) {
+static char **substitutions(char **args, Prompt *shell) {
     int indx = 0;
     char **result = NULL;
 
@@ -492,7 +492,7 @@ static char **substitutions(char **args, t_shell *shell) {
     return result;
 }
 
-char **mx_filters(char *arg, t_shell *shell) {
+char **mx_filters(char *arg, Prompt *shell) {
     char **args;
     char **result = NULL;
 
@@ -540,7 +540,7 @@ char *mx_subs_output(char **result) {
     return tokens;
 }
 
-char *subshell_parent(t_shell *shell, int *fd1, int *fd2, int pid) {
+char *subshell_parent(Prompt *shell, int *fd1, int *fd2, int pid) {
     int status;
     size_t n_read = 0;
     char buf[BUFSIZ];
@@ -569,7 +569,7 @@ char *subshell_parent(t_shell *shell, int *fd1, int *fd2, int pid) {
     return mx_subs_output(&result);
 }
 
-char *exec_sub_shell (t_shell *shell, int *fd1, int *fd2) {
+char *exec_sub_shell (Prompt *shell, int *fd1, int *fd2) {
     extern char **environ;
     pid_t pid;
     char *result = NULL;
@@ -592,7 +592,7 @@ char *exec_sub_shell (t_shell *shell, int *fd1, int *fd2) {
 }
 
 
-char *mx_run_sub_shell(char *substr, t_shell *shell) {
+char *mx_run_sub_shell(char *substr, Prompt *shell) {
     int len;
     int fd1[2];
     int fd2[2];
@@ -613,8 +613,8 @@ char *mx_run_sub_shell(char *substr, t_shell *shell) {
     return result;
 }
 
-int mx_get_proc_count(t_shell *shell, int job_id, int filter) {
-    t_process *p_process;
+int mx_get_proc_count(Prompt *shell, int job_id, int filter) {
+    Process *p_process;
     int count = 0;
 
     if (job_id > MX_JOBS_NUMBER || shell->jobs[job_id] == NULL) {
@@ -632,9 +632,9 @@ int mx_get_proc_count(t_shell *shell, int job_id, int filter) {
     return count;
 }
 
-void mx_set_process_status(t_shell *shell, int pid, int status) {
+void mx_set_process_status(Prompt *shell, int pid, int status) {
     int i;
-    t_process *p_process;
+    Process *p_process;
     int job_id = mx_job_id_by_pid(shell, pid);
 
     for (i = 1; i < shell->max_number_job; i++) {

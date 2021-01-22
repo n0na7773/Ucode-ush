@@ -19,7 +19,7 @@ int kill_check_pid(char *str) {
     return 0;
 }
 
-void kill_job(t_shell *shell, t_process *p_process, int i) {
+void kill_job(Prompt *shell, Process *p_process, int i) {
     int pgid;
     int job_id;
 
@@ -42,7 +42,7 @@ void kill_job(t_shell *shell, t_process *p_process, int i) {
     mx_set_job_status(shell, job_id, MX_STAT_TERMINATED);
 }
 
-void kill_pid(t_shell *shell, t_process *p_process, int i) {
+void kill_pid(Prompt *shell, Process *p_process, int i) {
     pid_t pid = 0;
 
     if ((kill_check_pid(p_process->argv[i])) > 0) {
@@ -60,7 +60,7 @@ void kill_pid(t_shell *shell, t_process *p_process, int i) {
     }
 }
 
-int mx_kill(t_shell *shell, t_process *p_process) {
+int mx_kill(Prompt *shell, Process *p_process) {
     int n_args = 0;
     p_process->exit_code = 0;
 

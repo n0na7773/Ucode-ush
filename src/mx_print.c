@@ -85,7 +85,7 @@ static char *get_delim_from_type(int t) {
     return NULL;
 }
 
-t_ast *mx_parse_error_ush(int t, t_ast *ast_res, char *str) {
+Abstract *mx_parse_error_ush(int t, Abstract *ast_res, char *str) {
     char *delim;
 
     if (t != SEP) {                      
@@ -135,8 +135,8 @@ int mx_count_options(char **args, char *options, char *command, char *error) {
     return n_options;
 }
 
-static void print_left(t_ast *q) {
-    for (t_ast *tmp_left = q->left; tmp_left; tmp_left = tmp_left->next) {
+static void print_left(Abstract *q) {
+    for (Abstract *tmp_left = q->left; tmp_left; tmp_left = tmp_left->next) {
         mx_printstr("redir == ");
 
         if (tmp_left->type == R_INPUT) mx_printstr("< ");
@@ -153,8 +153,8 @@ static void print_left(t_ast *q) {
     }
 }
 
-static void print_list(t_ast *parsed_line) {
-    for (t_ast *q = parsed_line; q; q = q->next) {
+static void print_list(Abstract *parsed_line) {
+    for (Abstract *q = parsed_line; q; q = q->next) {
         mx_printstr("proc  == ");
         if (q->args)
             mx_print_strarr_in_line(q->args, " ");
@@ -170,7 +170,7 @@ static void print_list(t_ast *parsed_line) {
     }
 }
 
-void mx_ast_print(t_ast **ast) {
+void mx_ast_print(Abstract **ast) {
     char *tmp = NULL;
     for (int i = 0; ast[i]; i++) {
         mx_print_color(MX_YEL, "job-");

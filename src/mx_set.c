@@ -10,12 +10,12 @@ int options_count(char **args) {
     return n_options;
 }
 
-int mx_set(t_shell *shell, t_process *p) {
+int mx_set(Prompt *shell, Process *p) {
     int n_options = options_count(p->argv);
     int exit_code = shell->exit_code;
 
     if (n_options == 0) {
-        for (t_export *q = shell->variables; q; q = q->next) {
+        for (Export *q = shell->variables; q; q = q->next) {
             mx_printstr(q->name);
             mx_printstr("=");
             mx_printstr(q->value);
@@ -26,12 +26,12 @@ int mx_set(t_shell *shell, t_process *p) {
     return exit_code;
 }
 
-int mx_alias(t_shell *shell, t_process *p) {
+int mx_alias(Prompt *shell, Process *p) {
     int n_options = options_count(p->argv);
     int exit_code = shell->exit_code;
 
     if (n_options == 0) {
-        for (t_export *q = shell->aliases; q; q = q->next) {
+        for (Export *q = shell->aliases; q; q = q->next) {
             mx_printstr(q->name);
             mx_printstr("='");
             mx_printstr(q->value);
@@ -42,12 +42,12 @@ int mx_alias(t_shell *shell, t_process *p) {
     return exit_code;
 }
 
-int mx_declare(t_shell *shell, t_process *p) {
+int mx_declare(Prompt *shell, Process *p) {
     int n_options = options_count(p->argv);
     int exit_code = shell->exit_code;
 
     if (n_options == 1 && mx_strcmp(p->argv[1], "-f") == 0) {
-        for (t_export *q = shell->functions; q; q = q->next) {
+        for (Export *q = shell->functions; q; q = q->next) {
             mx_printstr(q->name);
             mx_printstr(" () {\n\t");
             mx_printstr(q->value);
@@ -58,8 +58,8 @@ int mx_declare(t_shell *shell, t_process *p) {
     return exit_code;
 }
 
-void mx_set_variable(t_export *export, char *name, char *value) {
-    t_export *head_export = export;
+void mx_set_variable(Export *export, char *name, char *value) {
+    Export *head_export = export;
     int flag = 0;
 
     while (head_export != NULL) {
@@ -76,8 +76,8 @@ void mx_set_variable(t_export *export, char *name, char *value) {
     } 
 }
 
-void mx_set_r_infile(t_shell *shell, t_job *job, t_process *p_process) {
-    t_redir *redir;
+void mx_set_r_infile(Prompt *shell, Job *job, Process *p_process) {
+    Redirection *redir;
     int j = 0;
 
     p_process->r_infile = (int *) realloc(p_process->r_infile, sizeof(int) * (p_process->c_input));
@@ -97,7 +97,7 @@ void mx_set_r_infile(t_shell *shell, t_job *job, t_process *p_process) {
 }
 
 
-int mx_red_in(t_job *job, t_process *p_process, char *input_path, int j) {
+int mx_red_in(Job *job, Process *p_process, char *input_path, int j) {
     int status_redir = 0;
     int fd;
 
@@ -128,7 +128,7 @@ int set_flag(int redir_delim) {
     return flags;
 }
 
-int mx_set_redirections(t_shell *shell, t_job *job, t_process *p_process) {
+int mx_set_redirections(Prompt *shell, Job *job, Process *p_process) {
     mx_count_redir(p_process);
     shell->redir = 0;
 
@@ -145,8 +145,8 @@ int mx_set_redirections(t_shell *shell, t_job *job, t_process *p_process) {
     return shell->redir;
 }
 
-void mx_count_redir(t_process *p_process) {
-    t_redir *r;
+void mx_count_redir(Process *p_process) {
+    Redirection *r;
 
     p_process->c_input = 0;
     p_process->c_output = 0;
@@ -170,9 +170,9 @@ void mx_count_redir(t_process *p_process) {
     p_process->r_outfile = (int *) realloc(p_process->r_outfile, sizeof(int) * (p_process->c_output));
 }
 
-void mx_set_r_outfile(t_shell *shell, t_job *job, t_process *p_process) {
+void mx_set_r_outfile(Prompt *shell, Job *job, Process *p_process) {
     int fd;
-    t_redir *redir;
+    Redirection *redir;
     int j = 0;
     int flags = 0;
 
@@ -212,8 +212,8 @@ static void get_data (char *arg, char **name, char **value) {
     *name = strndup(arg,idx);
 }
 
-void mx_export_value(t_export *export, char *name, char *value) {
-    t_export *head = export;
+void mx_export_value(Export *export, char *name, char *value) {
+    Export *head = export;
 
     while (head != NULL) {
         if (strcmp(head->name, name) == 0) {
@@ -229,7 +229,7 @@ void mx_export_value(t_export *export, char *name, char *value) {
     }
 }
 
-int mx_set_parametr(char **args, t_shell *shell) {
+int mx_set_parametr(char **args, Prompt *shell) {
     char *name;
     char *value;
 
@@ -253,9 +253,9 @@ int mx_set_parametr(char **args, t_shell *shell) {
     return 0;
 }
 
-t_export *mx_set_variables() {
+Export *mx_set_variables() {
     extern char** environ;
-    t_export *variables = NULL;;
+    Export *variables = NULL;;
 
     for (size_t i = 0; environ[i] != NULL; i++) {
         int idx = mx_get_char_index(environ[i],'=');
@@ -277,8 +277,8 @@ t_export *mx_set_variables() {
     return variables;
 }
 
-t_export *mx_set_export() {
-    t_export *export = NULL;
+Export *mx_set_export() {
+    Export *export = NULL;
     extern char** environ;
 
     for (size_t i = 0; environ[i] != NULL; i++) {

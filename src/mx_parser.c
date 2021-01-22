@@ -1,7 +1,7 @@
 #include "ush.h"
 
-void func_push(t_ast **res, char *arg, int type, t_shell *shell) {
-    t_export *q;
+void func_push(Abstract **res, char *arg, int type, Prompt *shell) {
+    Export *q;
     char *tmp = mx_strdup(arg);
     char *args0 = mx_strtok(tmp, MX_USH_TOK_DELIM);
     for (q = shell->aliases; q; q = q->next) {
@@ -22,9 +22,9 @@ void func_push(t_ast **res, char *arg, int type, t_shell *shell) {
     mx_ast_push_back(res, arg, type);
 }
 
-void recurcion_func_alias(t_ast **res, int old) {
+void recurcion_func_alias(Abstract **res, int old) {
     if (old) {
-        t_ast *q = *res;
+        Abstract *q = *res;
         for (;q->next;)
             q = q->next;
         q->type = old;
@@ -41,7 +41,7 @@ bool isempty(char *s, char *delim) {
     return true;
 }
 
-t_ast *mx_ush_parsed_line(t_ast *res, char *line1, t_shell *shell, int old) {
+Abstract *mx_ush_parsed_line(Abstract *res, char *line1, Prompt *shell, int old) {
     char *line;
     int i = 0;
     char *tmp = NULL;
@@ -64,9 +64,9 @@ t_ast *mx_ush_parsed_line(t_ast *res, char *line1, t_shell *shell, int old) {
     return res;
 }
 
-t_ast **mx_ast_creation(char *line, t_shell *shell) {
-    t_ast **ast = NULL;
-    t_ast *parsed_line = NULL;
+Abstract **mx_ast_creation(char *line, Prompt *shell) {
+    Abstract **ast = NULL;
+    Abstract *parsed_line = NULL;
 
     if (!(parsed_line = mx_ush_parsed_line(parsed_line, line, shell, 0))) return NULL;
 
@@ -79,7 +79,7 @@ t_ast **mx_ast_creation(char *line, t_shell *shell) {
     return ast;
 }
 
-char *mx_ush_read_line(t_shell *shell) {
+char *mx_ush_read_line(Prompt *shell) {
     size_t bufsize = 0;
     char *res = NULL;
     char *line = mx_strnew(1);

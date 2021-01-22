@@ -31,7 +31,7 @@ int count_args_pwd(char **args, int n_options) {
     return num_args;
 }
 
-void print_pwd(char *dir, int *exit_code, t_shell *shell, pwd_t pwd_options) {
+void print_pwd(char *dir, int *exit_code, Prompt *shell, pwd_t pwd_options) {
     *exit_code = 0;
     if (pwd_options.P < 0) {
         printf("%s\n", shell->pwd);
@@ -42,7 +42,7 @@ void print_pwd(char *dir, int *exit_code, t_shell *shell, pwd_t pwd_options) {
     free(dir);
 }
 
-int mx_pwd(t_shell *shell, t_process *p) {
+int mx_pwd(Prompt *shell, Process *p) {
     int n_options = mx_count_options(p->argv, "LP", "pwd", " [-LP]");
     int num_args = count_args_pwd(p->argv, n_options);
     int exit_code = 1;

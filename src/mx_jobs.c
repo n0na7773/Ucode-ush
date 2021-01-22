@@ -25,7 +25,7 @@ void options_fill(int n_options, t_jobs *jobs_op, char **args) {
     }
 }
 
-void print_jobs_by_mask(t_shell *shell, t_jobs jobs_op, int i) {
+void print_jobs_by_mask(Prompt *shell, t_jobs jobs_op, int i) {
     if (jobs_op.r && !jobs_op.s) {
         if (shell->jobs[i] != NULL && mx_job_is_running(shell, i)) {
             mx_print_job_status(shell, i, jobs_op.l);
@@ -43,7 +43,7 @@ void print_jobs_by_mask(t_shell *shell, t_jobs jobs_op, int i) {
     }
 }
 
-void help_jobs(t_shell *shell, t_process *p_process, t_jobs jobs_op, int n_opt) {
+void help_jobs(Prompt *shell, Process *p_process, t_jobs jobs_op, int n_opt) {
     int job_id;
 
     for (int j = n_opt + 1; p_process->argv[j] != NULL; j++) {
@@ -61,7 +61,7 @@ void help_jobs(t_shell *shell, t_process *p_process, t_jobs jobs_op, int n_opt) 
     }
 }
 
-int mx_jobs(t_shell *shell, t_process *p_process) {
+int mx_jobs(Prompt *shell, Process *p_process) {
     t_jobs jobs_op = {0, 0, 0};
     int n_opt;
     int n_args;
@@ -88,7 +88,7 @@ int mx_jobs(t_shell *shell, t_process *p_process) {
     return p_process->exit_code;
 }
 
-int mx_get_next_job_id(t_shell *shell) {
+int mx_get_next_job_id(Prompt *shell) {
     for (int i = 1; i < shell->max_number_job + 1; i++) {
         if (shell->jobs[i] == NULL) {
             return i;
@@ -98,7 +98,7 @@ int mx_get_next_job_id(t_shell *shell) {
     return -1;
 }
 
-int mx_insert_job(t_shell *shell, t_job *job) {
+int mx_insert_job(Prompt *shell, Job *job) {
     int id;
 
     if ((id = mx_get_next_job_id(shell)) < 0) {
@@ -113,7 +113,7 @@ int mx_insert_job(t_shell *shell, t_job *job) {
     return id;
 }
 
-void mx_remove_job(t_shell *shell, int job_id) {
+void mx_remove_job(Prompt *shell, int job_id) {
     if (shell->jobs[job_id] == NULL || job_id > MX_JOBS_NUMBER) {
         return;
     }
@@ -127,7 +127,7 @@ void mx_remove_job(t_shell *shell, int job_id) {
     mx_pop_from_stack(shell, job_id);
 }
 
-void mx_remove_job_from_panel(t_shell *shell, int job_id) {
+void mx_remove_job_from_panel(Prompt *shell, int job_id) {
     if (job_id > MX_JOBS_NUMBER || shell->jobs[job_id] == NULL) {
         return;
     }
@@ -140,8 +140,8 @@ void mx_remove_job_from_panel(t_shell *shell, int job_id) {
     mx_pop_from_stack(shell, job_id);
 }
 
-int mx_job_id_by_pid(t_shell *shell, int pid) {
-    t_process *p_process;
+int mx_job_id_by_pid(Prompt *shell, int pid) {
+    Process *p_process;
     int i;
 
     for (i = 1; i <= shell->max_number_job + 1; i++) {
@@ -157,8 +157,8 @@ int mx_job_id_by_pid(t_shell *shell, int pid) {
     return -1;
 }
 
-int mx_set_job_status(t_shell *shell, int job_id, int status) {
-    t_process *p_process;
+int mx_set_job_status(Prompt *shell, int job_id, int status) {
+    Process *p_process;
 
     if (job_id > MX_JOBS_NUMBER || shell->jobs[job_id] == NULL) {
         return -1;
@@ -172,8 +172,8 @@ int mx_set_job_status(t_shell *shell, int job_id, int status) {
     return 0;
 }
 
-int mx_job_completed(t_shell *shell, int job_id) {
-    t_process *p_process;
+int mx_job_completed(Prompt *shell, int job_id) {
+    Process *p_process;
 
     if (job_id > MX_JOBS_NUMBER || shell->jobs[job_id] == NULL) {
         return -1;
@@ -187,8 +187,8 @@ int mx_job_completed(t_shell *shell, int job_id) {
     return 1;
 }
 
-int mx_job_is_running(t_shell *shell, int job_id) {
-    t_process *p_process;
+int mx_job_is_running(Prompt *shell, int job_id) {
+    Process *p_process;
     int status = 0;
 
     if (job_id > MX_JOBS_NUMBER || shell->jobs[job_id] == NULL) {
@@ -203,8 +203,8 @@ int mx_job_is_running(t_shell *shell, int job_id) {
     return status;
 }
 
-int mx_g_find_job(t_shell *shell, char *arg) {
-    t_process *p_process;
+int mx_g_find_job(Prompt *shell, char *arg) {
+    Process *p_process;
     int i;
 
     for (i = shell->jobs_stack->top; i >= 0 ; i--) {
@@ -221,8 +221,8 @@ int mx_g_find_job(t_shell *shell, char *arg) {
     return -1;
 }
 
-void mx_destroy_jobs(t_shell *shell, int id) {
-    t_process *p_process;
+void mx_destroy_jobs(Prompt *shell, int id) {
+    Process *p_process;
 
     for (p_process = shell->jobs[id]->first_pr; p_process != NULL; p_process = p_process->next) {
         mx_clear_process(p_process);
@@ -230,7 +230,7 @@ void mx_destroy_jobs(t_shell *shell, int id) {
     free(shell->jobs[id]);
 }
 
-void mx_check_jobs(t_shell *shell) {
+void mx_check_jobs(Prompt *shell) {
     int job_id;
     pid_t pid;
     int status;
@@ -255,7 +255,7 @@ void mx_check_jobs(t_shell *shell) {
     }
 }
 
-int mx_wait_job(t_shell *shell, int job_id) {
+int mx_wait_job(Prompt *shell, int job_id) {
     int wait_count = 0;
     int wait_pid = -1;
     int status = 0;
@@ -282,8 +282,8 @@ int mx_wait_job(t_shell *shell, int job_id) {
 
 
 
-void mx_init_jobs_stack(t_shell *shell) {
-    t_stack *st = malloc(sizeof(t_stack));
+void mx_init_jobs_stack(Prompt *shell) {
+    Stack *st = malloc(sizeof(Stack));
     st->size = MX_JOBS_NUMBER;
     st->last = -1;
     st->prev_last = -1;
@@ -297,13 +297,13 @@ void mx_init_jobs_stack(t_shell *shell) {
     shell->jobs_stack = st;
 }
 
-void mx_push_to_stack(t_shell *shell, int job) {
+void mx_push_to_stack(Prompt *shell, int job) {
     if (shell->jobs_stack->top < shell->jobs_stack->size) {
         shell->jobs_stack->stack[++shell->jobs_stack->top] = job;
     }
 }
 
-void mx_pop_from_stack(t_shell *shell, int job) {
+void mx_pop_from_stack(Prompt *shell, int job) {
     int size = shell->jobs_stack->size;
     int *temp = malloc(sizeof(int) * size);
     int i;
@@ -330,7 +330,7 @@ void mx_pop_from_stack(t_shell *shell, int job) {
     free(temp);
 }
 
-bool mx_get_froshelltack(t_shell *shell, int job_id) {
+bool mx_get_froshelltack(Prompt *shell, int job_id) {
     if (shell->jobs_stack->top >= 0) {
         if (job_id == shell->jobs_stack->stack[shell->jobs_stack->top]) {
             return true;
@@ -339,8 +339,8 @@ bool mx_get_froshelltack(t_shell *shell, int job_id) {
     return false;
 }
 
-int mx_get_job_status(t_shell *shell, int job_id, int status) {
-    t_process *p;
+int mx_get_job_status(Prompt *shell, int job_id, int status) {
+    Process *p;
     int flag = 0;
 
     if (job_id > MX_JOBS_NUMBER || shell->jobs[job_id] == NULL) {
@@ -354,7 +354,7 @@ int mx_get_job_status(t_shell *shell, int job_id, int status) {
     return flag;
 }
 
-void mx_print_stack(t_shell *shell) {
+void mx_print_stack(Prompt *shell) {
     int job_id;
 
     if (shell->jobs_stack->top >= 0) {
@@ -366,7 +366,7 @@ void mx_print_stack(t_shell *shell) {
     }
 }
 
-void mx_set_last_job(t_shell *shell) {
+void mx_set_last_job(Prompt *shell) {
     int last = -1;
     int size = shell->jobs_stack->top;
 
@@ -390,7 +390,7 @@ void mx_set_last_job(t_shell *shell) {
     shell->jobs_stack->last = last;
 }
 
-int mx_get_pgid_by_job_id(t_shell *shell, int job_id) {
+int mx_get_pgid_by_job_id(Prompt *shell, int job_id) {
     if (job_id > MX_JOBS_NUMBER || shell->jobs[job_id] == NULL) {
         return -1;
     }
@@ -404,10 +404,10 @@ static void print_spaces(int number) {
     }
 }
 
-void mx_print_job_status(t_shell *shell, int job_id, int flag) {
+void mx_print_job_status(Prompt *shell, int job_id, int flag) {
     const char* status[] = {"running", "done", "suspended", "continued", "terminated"};
     int len;
-    t_process *p;
+    Process *p;
 
     printf("[%d] ", job_id);
     if (shell->jobs_stack->last == job_id) {
@@ -436,8 +436,8 @@ void mx_print_job_status(t_shell *shell, int job_id, int flag) {
     }
 }
 
-void mx_print_pid_process_in_job(t_shell *shell, int job_id) {
-    t_process *p_process;
+void mx_print_pid_process_in_job(Prompt *shell, int job_id) {
+    Process *p_process;
 
     if (shell->jobs[job_id] == NULL || job_id > MX_JOBS_NUMBER) {
         mx_printstr("error job_id");
@@ -452,8 +452,8 @@ void mx_print_pid_process_in_job(t_shell *shell, int job_id) {
     }
 }
 
-static t_job *init_job(t_process *first_p) {
-    t_job *new_job = (t_job *) malloc(sizeof(t_job));
+static Job *init_job(Process *first_p) {
+    Job *new_job = (Job *) malloc(sizeof(Job));
 
     new_job->first_pr = first_p;
     new_job->foregrd = 1;
@@ -472,10 +472,10 @@ static t_job *init_job(t_process *first_p) {
     return new_job;
 }
 
-t_job *mx_create_job(t_shell *shell, t_ast *list) {
-    t_process *first_p = NULL;
+Job *mx_create_job(Prompt *shell, Abstract *list) {
+    Process *first_p = NULL;
 
-    for (t_ast *l = list; l; l = l->next) {
+    for (Abstract *l = list; l; l = l->next) {
         if ((l->args = mx_filters(l->token, shell)) && *(l->args))
             mx_push_process_back(&first_p, shell, l);
         else {
@@ -486,7 +486,7 @@ t_job *mx_create_job(t_shell *shell, t_ast *list) {
     return init_job(first_p);
 }
 
-void execute_job_env (t_job *job) {
+void execute_job_env (Job *job) {
     extern char **environ;
 
     job->env = environ;
@@ -497,7 +497,7 @@ void execute_job_env (t_job *job) {
     }
 }
 
-void help_ex_job (t_shell *shell, t_job *job, t_process *p_process, int job_id) {
+void help_ex_job (Prompt *shell, Job *job, Process *p_process, int job_id) {
     p_process->errfile = job->errfile;
     p_process->outfile = job->outfile;
     p_process->infile = job->infile;
@@ -529,7 +529,7 @@ void help_ex_job (t_shell *shell, t_job *job, t_process *p_process, int job_id) 
     shell->exit_code = job->exit_code;
 }
 
-void launch_help (t_shell *shell, t_job *job, int job_id, int status) {
+void launch_help (Prompt *shell, Job *job, int job_id, int status) {
     int shell_terminal = STDIN_FILENO;
 
     if (job->foregrd) {
@@ -556,7 +556,7 @@ void launch_help (t_shell *shell, t_job *job, int job_id, int status) {
     }
 }
 
-void m_pipe(t_shell *shell, t_job *job, int mypipe[2], int job_id) {
+void m_pipe(Prompt *shell, Job *job, int mypipe[2], int job_id) {
     if (pipe(mypipe) < 0) {
         perror("pipe");
         mx_remove_job(shell, job_id);
@@ -566,8 +566,8 @@ void m_pipe(t_shell *shell, t_job *job, int mypipe[2], int job_id) {
     job->outfile = mypipe[1];
 }
 
-int execute_job (t_shell *shell, t_job * job, int job_id) {
-    t_process *p_process;
+int execute_job (Prompt *shell, Job * job, int job_id) {
+    Process *p_process;
     int mypipe[2];
 
     execute_job_env(job);
@@ -594,7 +594,7 @@ int execute_job (t_shell *shell, t_job * job, int job_id) {
     return job->exit_code;
 }
 
-void mx_launch_job (t_shell *shell, t_job *job) {
+void mx_launch_job (Prompt *shell, Job *job) {
     setbuf(stdout, NULL);
 
     int status = 0;

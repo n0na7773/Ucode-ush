@@ -1,6 +1,6 @@
 #include "ush.h"
 
-static void get_exit_code(t_process *proc, int *exit_index, int *flag, int *start){
+static void get_exit_code(Process *proc, int *exit_index, int *flag, int *start){
     if (proc->argv[1][0] == '+' || proc->argv[1][0] == '-') {
         if (proc->argv[1][1] == '\0') (*flag)++;
         (*start)++;
@@ -18,7 +18,7 @@ static void get_exit_code(t_process *proc, int *exit_index, int *flag, int *star
     }
 }
 
-static void real_exit(t_shell *shell, t_process *proc) {
+static void real_exit(Prompt *shell, Process *proc) {
     int exit_index = shell->exit_code;
     int flag = 0,  start = 0;
 
@@ -29,7 +29,7 @@ static void real_exit(t_shell *shell, t_process *proc) {
     exit(exit_index);
 }
 
-int mx_exit(t_shell *shell, t_process *proc) {
+int mx_exit(Prompt *shell, Process *proc) {
     if (proc->argv[1] != NULL && proc->argv[2] != NULL) {
         mx_printerr("ush: exit: too many arguments\n");
     } else if (shell->jobs_stack->top && shell->exit_flag == 0) {
@@ -41,19 +41,19 @@ int mx_exit(t_shell *shell, t_process *proc) {
     return 1;
 }
 
-int mx_false(t_shell *shell, t_process *p) {
+int mx_false(Prompt *shell, Process *p) {
     shell->exit_flag = 0;
     p->exit_code = 0;
     return 0;
 }
 
-int mx_true(t_shell *shell, t_process *p) {
+int mx_true(Prompt *shell, Process *p) {
     shell->exit_flag = 1;
     p->exit_code = 1;
     return 1;
 }
 
-void mx_clear_all(t_shell *shell) {
+void mx_clear_all(Prompt *shell) {
     mx_clear_export(shell->exported);
     mx_clear_export(shell->variables);
     mx_clear_export(shell->functions);
@@ -63,9 +63,9 @@ void mx_clear_all(t_shell *shell) {
     free(shell->pwd);
 }
 
-void mx_clear_export(t_export *list) {
-    t_export *tmtmp_exp = list;
-    t_export *tmp = NULL;
+void mx_clear_export(Export *list) {
+    Export *tmtmp_exp = list;
+    Export *tmp = NULL;
 
     if (!(list) || !list)
         return;
@@ -94,11 +94,11 @@ void mx_clear_list(t_list **list) {
     *list = NULL;
 }
 
-void mx_ast_clear_list(t_ast **list) {
+void mx_ast_clear_list(Abstract **list) {
     if (!(*list) || !list) return;
 
-    t_ast *tmtmp_exp = *list;
-    t_ast *tmp = NULL;
+    Abstract *tmtmp_exp = *list;
+    Abstract *tmp = NULL;
 
     while (tmtmp_exp) {
         if (tmtmp_exp->token) free(tmtmp_exp->token);
@@ -112,8 +112,8 @@ void mx_ast_clear_list(t_ast **list) {
     *list = NULL;
 }
 
-void mx_ast_clear_all(t_ast ***list) {
-    t_ast **tmtmp_exp = *list;
+void mx_ast_clear_all(Abstract ***list) {
+    Abstract **tmtmp_exp = *list;
 
     for (int i = 0; tmtmp_exp[i]; i++) mx_ast_clear_list(&tmtmp_exp[i]);
 

@@ -134,7 +134,7 @@
 #define MX_IS_REDIRECTION(x)    (MX_IS_REDIR_INP(x) || MX_IS_REDIR_OUTP(x))
 
 // Operators
-enum e_type {
+enum _type {
     SEP,            // ;
     FON,            // &
     AND,            // &&
@@ -145,25 +145,25 @@ enum e_type {
     R_OUTPUT,       // >
     R_OUTPUT_DBL,   // >>
     NUL
-}   t_type;
+};
 
 // Abstract Syntax
-typedef struct s_ast {
+typedef struct _abst {
     char    **args;
     char    *token;
     int     type;
-    struct  s_ast *next;
-    struct  s_ast *left;
-}              t_ast;
+    struct  _abst *next;
+    struct  _abst *left;
+}              Abstract;
 
 // Redirections
-typedef struct s_redir {
+typedef struct _redirect {
     int     mypipe_redir[2];
     char    *input_path;   // < <<
     char    *output_path;  // > >>
-    int     redir_delim;    // <, <<, >, >> from e_type
-    struct  s_redir *next;
-}              t_redir;
+    int     redir_delim;    // <, <<, >, >> from _type
+    struct  _redirect *next;
+}              Redirection;
 
 typedef struct s_jobs {
     int l;
@@ -199,39 +199,39 @@ typedef struct env_s {
     int P;
 }              env_t;
 
-typedef struct  s_export {
+typedef struct  _export {
     char *name;
     char *value;
-    struct s_export *next;
-}               t_export;
+    struct _export *next;
+}               Export;
 
-typedef struct  s_stack {
+typedef struct  _stack {
     int         size;       // Size = MX_JOBS_NUMBER
     int*        stack;
     int         top;        // Index of last add job
     int         last;       // Current job gor fg
     int         prev_last;
-}              t_stack;
+}              Stack;
 
-typedef struct s_env_builtin  {
+typedef struct _env_builtin  {
     env_t       env_options;
     int         n_options;
     int         n_variables;
     int         n_args;
-    t_export    *env_list;
-    t_export    *env_params;
+    Export    *env_list;
+    Export    *env_params;
     char        *path;
-}              t_env_builtin;
+}              BuiltIn;
 
-typedef struct s_process {
+typedef struct _process {
     char    *fullpath;     // For execve
     char    **argv;        // Gets in create_job.c
     char    *command;
     char    *arg_command;
     char    *input_path;   // < <<
     char    *output_path;  // > >>
-    int     redir_delim;    // <, <<, >, >> from e_type
-    t_redir *redirect;  // New
+    int     redir_delim;    // <, <<, >, >> from _type
+    Redirection *redirect;  // New
     int     c_input;        // Count_redir_input
     int     c_output;       // Count_redir_output
     int     *r_infile;
@@ -245,19 +245,19 @@ typedef struct s_process {
     int     pipe;           // Gets in create_job.c
     int     delim;          // Gets in create_job.c (first - | || &&) (end - ; &)
     int     type;  // COMMAND_BUILTIN = index in m_s->builtin_list; default = 0
-    struct s_process *next;  // Next process in pipeline
+    struct _process *next;  // Next process in pipeline
     pid_t   pgid;
     int     infile;
     int     outfile;
     int     errfile;
-}             t_process;
+}             Process;
 
 // Pipeline of processes
-typedef struct s_job {
+typedef struct _job {
     int     job_id;             // Number in jobs control
     int     job_type;           // 0 if normal, or enum &&, || of previos job
     char    *command;          // Command line, used for messages
-    t_process *first_pr;    // List of processes in this job
+    Process *first_pr;    // List of processes in this job
     pid_t   pgid;             // Process group ID
     char    *path;
     char    **env;
@@ -271,16 +271,16 @@ typedef struct s_job {
     int     stdin;              // Standard i/o channels
     int     stdout;             // Standard i/o channels
     int     stderr;             // Standard i/o channels
-    struct s_job *next;     // Next job separated by ";" "&&" "||"
-}             t_job;
+    struct _job *next;     // Next job separated by ";" "&&" "||"
+}             Job;
 
-typedef struct s_shell {
+typedef struct _prompt {
     int     argc;
     char    **argv;            // Check usage, becouse the same in process
     char    **envp;            // Not used
     int     exit_code;          // Return if exit
-    t_job   *jobs[MX_JOBS_NUMBER];  // Arr jobs
-    t_stack *jobs_stack;
+    Job   *jobs[MX_JOBS_NUMBER];  // Arr jobs
+    Stack *jobs_stack;
     int     max_number_job;     // Number of added jobs + 1
     char    **builtin_list;    // Buildin functions
     int     exit_flag;      // Defaults 0, cheack if you have suspended jobs
@@ -298,193 +298,193 @@ typedef struct s_shell {
     char    *git;
     int     line_len;
     int     prompt_status;
-    t_export *exported;
-    t_export *variables;
-    t_export *functions;
-    t_export *aliases;
+    Export *exported;
+    Export *variables;
+    Export *functions;
+    Export *aliases;
     int     redir;
     char    *kernal;
-}             t_shell;
+}             Prompt;
 
 // Abstract Syntax
-t_ast **mx_ast_creation(char *, t_shell *);
-t_ast *mx_ush_parsed_line(t_ast *, char *, t_shell *, int);
+Abstract **mx_ast_creation(char *, Prompt *);
+Abstract *mx_ush_parsed_line(Abstract *, char *, Prompt *, int);
 char *mx_get_token_and_delim(char *, int *, int *);
 char **mx_parce_tokens(char *);
 char *mx_strtok (char *, const char *);
 
 //Clear
-t_ast **mx_ast_parse(t_ast *);
-void mx_ast_push_back(t_ast **, char *, int );
-void mx_ast_push_back_redirection(t_ast **, char *, int);
-void mx_ast_clear_list(t_ast **);
-void mx_ast_clear_all(t_ast ***);
+Abstract **mx_ast_parse(Abstract *);
+void mx_ast_push_back(Abstract **, char *, int );
+void mx_ast_push_back_redirection(Abstract **, char *, int);
+void mx_ast_clear_list(Abstract **);
+void mx_ast_clear_all(Abstract ***);
 
-void mx_redir_push_back(t_redir **, char *, int);
-void mx_redir_clear_list(t_redir **);
+void mx_redir_push_back(Redirection **, char *, int);
+void mx_redir_clear_list(Redirection **);
 
 bool mx_check_parce_errors(char *);
 bool mx_parse_error(char *, int );
 char *mx_syntax_error(char *);
 bool mx_unmached_error(char );
-t_ast *mx_parse_error_ush(int , t_ast *, char *);
+Abstract *mx_parse_error_ush(int , Abstract *, char *);
 
-void mx_ast_print(t_ast **ast);
-char *mx_ush_read_line(t_shell *);
+void mx_ast_print(Abstract **ast);
+char *mx_ush_read_line(Prompt *);
 
 // Filters
-char **mx_filters(char *, t_shell *);
+char **mx_filters(char *, Prompt *);
 
-char *mx_subst_tilde(char *, t_export *);
+char *mx_subst_tilde(char *, Export *);
 char *mx_add_login(char *, char *);
-char *mx_substr_dollar(char *, t_export *);
-char *mx_sub_str_command(char *, t_shell *);
+char *mx_substr_dollar(char *, Export *);
+char *mx_sub_str_command(char *, Prompt *);
 
-bool mx_get_functions(char *, t_shell *);
-void mx_get_aliases(char *, t_shell *);
+bool mx_get_functions(char *, Prompt *);
+void mx_get_aliases(char *, Prompt *);
 
 // Quote manager
 int mx_get_char_index_quote(char *, char *, char *);
 void mx_strtrim_quote(char **);
 
 // Initialization
-t_shell *mx_init_shell(int , char **);
-void mx_set_shell_grp(t_shell *);
+Prompt *init_ush(int , char **);
+void mx_set_shell_grp(Prompt *);
 
 // Terminal
-void mx_termios_save(t_shell *);
-void mx_termios_restore(t_shell *);
+void mx_termios_save(Prompt *);
+void mx_termios_restore(Prompt *);
 
 // Loop
-void mx_ush_loop(t_shell *);
-t_job *mx_create_job(t_shell *, t_ast *);
-void mx_push_process_back(t_process **, t_shell *, t_ast *);
-void mx_clear_process(t_process *);
-void mx_launch_job(t_shell *, t_job *);
+void mx_ush_loop(Prompt *);
+Job *mx_create_job(Prompt *, Abstract *);
+void mx_push_process_back(Process **, Prompt *, Abstract *);
+void mx_clear_process(Process *);
+void mx_launch_job(Prompt *, Job *);
 
-int mx_set_redirections(t_shell *, t_job *, t_process *);
-void mx_count_redir(t_process *);
-void mx_set_r_infile(t_shell *, t_job  *, t_process *);
-void mx_set_r_outfile(t_shell *, t_job *, t_process *);
+int mx_set_redirections(Prompt *, Job *, Process *);
+void mx_count_redir(Process *);
+void mx_set_r_infile(Prompt *, Job  *, Process *);
+void mx_set_r_outfile(Prompt *, Job *, Process *);
 
-int mx_red_in(t_job *, t_process *, char *, int j);
-int mx_red_in_d(t_job *, t_process *, char *, int j);
+int mx_red_in(Job *, Process *, char *, int j);
+int mx_red_in_d(Job *, Process *, char *, int j);
 
-void mx_dup_fd(t_process *);
-int mx_launch_process(t_shell *, t_process *, int);
-int mx_builtin_commands_idex(t_shell *, char *);
-void mx_pgid(t_shell *, int , int );
+void mx_dup_fd(Process *);
+int mx_launch_process(Prompt *, Process *, int);
+int mx_builtin_commands_idex(Prompt *, char *);
+void mx_pgid(Prompt *, int , int );
 
 // Builtin commands
-int mx_env(t_shell *, t_process *);
-int mx_echo(t_shell *, t_process *);
-int mx_jobs(t_shell *, t_process *);
-int mx_fg(t_shell *, t_process *);
-int mx_bg(t_shell *, t_process *);
-int mx_cd(t_shell *, t_process *);
-int mx_pwd(t_shell *, t_process *);
-int mx_export(t_shell *, t_process *);
-int mx_unset(t_shell *, t_process *);
-int mx_which(t_shell *, t_process *);
-int mx_exit(t_shell *, t_process *);
-int mx_set(t_shell *, t_process *);
-int mx_chdir(t_shell *, t_process *);
-int mx_kill(t_shell *, t_process *);
-int mx_true(t_shell *, t_process *);
-int mx_alias(t_shell *, t_process *);  
-int mx_declare(t_shell *, t_process *);
-int mx_false(t_shell *, t_process *);
+int mx_env(Prompt *, Process *);
+int mx_echo(Prompt *, Process *);
+int mx_jobs(Prompt *, Process *);
+int mx_fg(Prompt *, Process *);
+int mx_bg(Prompt *, Process *);
+int mx_cd(Prompt *, Process *);
+int mx_pwd(Prompt *, Process *);
+int mx_export(Prompt *, Process *);
+int mx_unset(Prompt *, Process *);
+int mx_which(Prompt *, Process *);
+int mx_exit(Prompt *, Process *);
+int mx_set(Prompt *, Process *);
+int mx_chdir(Prompt *, Process *);
+int mx_kill(Prompt *, Process *);
+int mx_true(Prompt *, Process *);
+int mx_alias(Prompt *, Process *);  
+int mx_declare(Prompt *, Process *);
+int mx_false(Prompt *, Process *);
 
 // Signals
 void mx_sig_h(int signal);
 
 // Jobs
-int mx_get_next_job_id(t_shell *);
-int mx_insert_job(t_shell *, t_job *);
-void mx_remove_job(t_shell *, int );
-void mx_remove_job_from_panel(t_shell *, int );
-int mx_get_proc_count(t_shell *, int , int );
-void mx_set_process_status(t_shell *, int , int );
-int mx_set_job_status(t_shell *, int , int );
-int mx_get_job_status(t_shell *, int , int );
-void mx_set_last_job(t_shell *);
-int mx_g_find_job(t_shell *, char *);
+int mx_get_next_job_id(Prompt *);
+int mx_insert_job(Prompt *, Job *);
+void mx_remove_job(Prompt *, int );
+void mx_remove_job_from_panel(Prompt *, int );
+int mx_get_proc_count(Prompt *, int , int );
+void mx_set_process_status(Prompt *, int , int );
+int mx_set_job_status(Prompt *, int , int );
+int mx_get_job_status(Prompt *, int , int );
+void mx_set_last_job(Prompt *);
+int mx_g_find_job(Prompt *, char *);
 void mx_dup_close(int , int );
 
-int mx_job_is_running(t_shell *, int );
+int mx_job_is_running(Prompt *, int );
 
-void mx_init_jobs_stack(t_shell *);
-void mx_push_to_stack (t_shell *, int );
-void mx_pop_from_stack(t_shell * , int );
-bool mx_get_from_stack(t_shell *, int );
-void mx_print_stack (t_shell *);
+void mx_init_jobs_stack(Prompt *);
+void mx_push_to_stack (Prompt *, int );
+void mx_pop_from_stack(Prompt * , int );
+bool mx_get_from_stack(Prompt *, int );
+void mx_print_stack (Prompt *);
 
-int mx_job_id_by_pid(t_shell *, int );
-int mx_get_pgid_by_job_id(t_shell *, int );
-int mx_job_completed(t_shell *, int );
+int mx_job_id_by_pid(Prompt *, int );
+int mx_get_pgid_by_job_id(Prompt *, int );
+int mx_job_completed(Prompt *, int );
 
-void mx_print_pid_process_in_job(t_shell *, int );  // If foreg execution
-void mx_print_job_status(t_shell *, int , int );
+void mx_print_pid_process_in_job(Prompt *, int );  // If foreg execution
+void mx_print_job_status(Prompt *, int , int );
 void mx_print_args_in_line(char **, const char *);
 
-void mx_check_jobs(t_shell *);              // Waitpid any 
-int mx_wait_job(t_shell *, int );         // Waitpid  in  group
-void mx_destroy_jobs(t_shell *, int );    // Free  memory
+void mx_check_jobs(Prompt *);              // Waitpid any 
+int mx_wait_job(Prompt *, int );         // Waitpid  in  group
+void mx_destroy_jobs(Prompt *, int );    // Free  memory
 
 void mx_err_j(char *, char *, char *, char *);
-int mx_check_args(t_shell *, t_process *);  // Use in fg and bg
-int mx_bg_get_job_id(t_shell *, t_process *);
+int mx_check_args(Prompt *, Process *);  // Use in fg and bg
+int mx_bg_get_job_id(Prompt *, Process *);
 
 
 void mx_printstr(const char *);
 void mx_printerr(const char *);
 char *mx_normalization (char *, char *);
-void mx_push_export(t_export **, void *, void *);
-t_export *mx_set_variables();
-t_export *mx_set_export();
+void mx_push_export(Export **, void *, void *);
+Export *mx_set_variables();
+Export *mx_set_export();
 int mx_count_options(char **, char *, char *, char *);
-void mx_set_variable(t_export *, char *, char *);
+void mx_set_variable(Export *, char *, char *);
 char mx_get_type(struct stat);
-int mx_launch_bin(t_process *, char *, char **);
-int mx_set_parametr(char **,  t_shell *);
+int mx_launch_bin(Process *, char *, char **);
+int mx_set_parametr(char **,  Prompt *);
 
 
-int mx_launch_builtin(t_shell *, t_process *, int );
+int mx_launch_builtin(Prompt *, Process *, int );
 char *mx_get_git_info(void);
-void mx_clear_all(t_shell *);
-char *mx_go_somewere(t_process *, int );
+void mx_clear_all(Prompt *);
+char *mx_go_somewere(Process *, int );
 char *mx_go_back(void);
 char *mx_go_home(void);
-void mx_change_dir(char *, cd_t , t_shell *, int *);
+void mx_change_dir(char *, cd_t , Prompt *, int *);
 char *mx_strdup_from(char *, int index);
-void mx_export_or_error(char *, t_export *, t_export *, int *);
-void mx_clear_export(t_export *);
-void mx_set_data(t_env_builtin *, char *[]);
-void mx_launch_command( t_process *, t_env_builtin *, int *);
-int mx_count_env_options(char **, t_env_builtin *);
-void mx_escape_seq(t_process *, int , echo_t );
-void mx_get_command_info(t_shell *, char *, int *, which_t );
-char *mx_get_keys(t_shell *);
-void mx_print_prompt(t_shell *);
-void mx_edit_prompt(t_shell *);
-void mx_edit_command(int , int *, char **, t_shell *);
-void mx_exec_signal(int , char **, int *, t_shell *);
-char *mx_get_line(t_shell *);
+void mx_export_or_error(char *, Export *, Export *, int *);
+void mx_clear_export(Export *);
+void mx_set_data(BuiltIn *, char *[]);
+void mx_launch_command( Process *, BuiltIn *, int *);
+int mx_count_env_options(char **, BuiltIn *);
+void mx_escape_seq(Process *, int , echo_t );
+void mx_get_command_info(Prompt *, char *, int *, which_t );
+char *mx_get_keys(Prompt *);
+void mx_print_prompt(Prompt *);
+void mx_edit_prompt(Prompt *);
+void mx_edit_command(int , int *, char **, Prompt *);
+void mx_exec_signal(int , char **, int *, Prompt *);
+char *mx_get_line(Prompt *);
 int mx_get_flag(char **);
-void mx_sheck_exit(t_shell *, t_process *);
-int mx_add_option(char **, int *, int *, t_env_builtin *);
+void mx_sheck_exit(Prompt *, Process *);
+int mx_add_option(char **, int *, int *, BuiltIn *);
 void mx_env_err(int *, int *, char );
 void mx_print_env_error(char , char *);
 void mx_clear_data(char *, char *);
 void mx_print_error(char *, char *);
 char *mx_get_shlvl(void);
-void mx_export_value(t_export *, char *, char *);
+void mx_export_value(Export *, char *, char *);
 
 void mx_dup2_fd(int *, int *);
-char *mx_run_sub_shell(char *, t_shell *);
+char *mx_run_sub_shell(char *, Prompt *);
 char *mx_subs_output(char **);
 
-void mx_print_fd(t_process  *);
+void mx_print_fd(Process  *);
 
 char **mx_strdup_arr(char **);
 
@@ -507,6 +507,6 @@ void mx_clear_list(t_list **);
 //Cd
 void cd_fill_options(int , cd_t *, char **);
 int cd_count_args(char **, int );
-char *chpwd(char **, int , t_shell *);
+char *chpwd(char **, int , Prompt *);
 char *replace_sub(char *, char *, char *);
 #endif

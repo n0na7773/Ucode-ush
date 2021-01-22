@@ -1,6 +1,6 @@
 #include "ush.h"
 
-static int fg_send_signal(t_shell *shell, t_process *proc, int pg_id, int id_job) {
+static int fg_send_signal(Prompt *shell, Process *proc, int pg_id, int id_job) {
     if (kill(-pg_id, SIGCONT) < 0) {
         mx_err_j("fg", ": job not found: ", proc->argv[1], "\n");
         return 1;
@@ -20,7 +20,7 @@ static int fg_send_signal(t_shell *shell, t_process *proc, int pg_id, int id_job
     return stat;
 }
 
-static int fg_get_job_id (t_shell *shell, t_process *proc) {
+static int fg_get_job_id (Prompt *shell, Process *proc) {
     int id_job, args_num = 0;
 
     for (int i = 0; proc->argv[i] != NULL; i++) args_num++;
@@ -38,7 +38,7 @@ static int fg_get_job_id (t_shell *shell, t_process *proc) {
     return id_job;
 }
 
-int mx_fg(t_shell *shell, t_process *proc) {
+int mx_fg(Prompt *shell, Process *proc) {
     int stat, id_job = 0;;
     pid_t pg_id = 0;
 

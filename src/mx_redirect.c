@@ -1,6 +1,6 @@
 #include "ush.h"
 
-static int count_sep_first_lwl(t_ast *q_ast) {
+static int count_sep_first_lwl(Abstract *q_ast) {
     int i = 1;
 
     for (; q_ast; q_ast = q_ast->next)
@@ -9,9 +9,9 @@ static int count_sep_first_lwl(t_ast *q_ast) {
     return i;
 }
 
-t_ast *push_redirections(t_ast **q_ast_arr, t_ast **ast) {
+Abstract *push_redirections(Abstract **q_ast_arr, Abstract **ast) {
     int temp_type;
-    t_ast *c = (*q_ast_arr)->next;
+    Abstract *c = (*q_ast_arr)->next;
 
     temp_type = (*q_ast_arr)->type;
     for (; c && MX_IS_REDIRECTION(temp_type); c = c->next, (*q_ast_arr) = (*q_ast_arr)->next) {
@@ -25,11 +25,11 @@ t_ast *push_redirections(t_ast **q_ast_arr, t_ast **ast) {
     return *q_ast_arr;
 }
 
-t_ast **mx_ast_parse(t_ast *parsed_line) {
-    t_ast *q = parsed_line;
+Abstract **mx_ast_parse(Abstract *parsed_line) {
+    Abstract *q = parsed_line;
     int k = count_sep_first_lwl(q);
     int i = 0;
-    t_ast **ast = (t_ast **)malloc((k + 1) * sizeof(t_ast *));
+    Abstract **ast = (Abstract **)malloc((k + 1) * sizeof(Abstract *));
 
     ast[i] = NULL;
     for (; q; q = q->next) {
@@ -45,14 +45,14 @@ t_ast **mx_ast_parse(t_ast *parsed_line) {
 }
 
 
-t_ast *ast_create_node(char *arg, int type) {
-    t_ast *ast_q;
+Abstract *ast_create_node(char *arg, int type) {
+    Abstract *ast_q;
 
     if (!arg) {
         return NULL;
     }
 
-    ast_q = (t_ast *)malloc(sizeof(t_ast));
+    ast_q = (Abstract *)malloc(sizeof(Abstract));
     if (!ast_q) {
         return NULL;
     }
@@ -66,9 +66,9 @@ t_ast *ast_create_node(char *arg, int type) {
     return ast_q;
 }
 
-void mx_ast_push_back(t_ast **ast_head, char *arg, int type) {
-    t_ast *ast_q;
-    t_ast *ast_p;
+void mx_ast_push_back(Abstract **ast_head, char *arg, int type) {
+    Abstract *ast_q;
+    Abstract *ast_p;
 
     if (!ast_head || !arg) {
         return;
@@ -91,8 +91,8 @@ void mx_ast_push_back(t_ast **ast_head, char *arg, int type) {
     }
 }
 
-void mx_ast_push_back_redirection(t_ast **ast_head, char *arg, int type) {
-    t_ast *ast_p;
+void mx_ast_push_back_redirection(Abstract **ast_head, char *arg, int type) {
+    Abstract *ast_p;
 
     if (!ast_head || !arg) {
         return;
@@ -111,14 +111,14 @@ void mx_ast_push_back_redirection(t_ast **ast_head, char *arg, int type) {
     }
 }
 
-t_redir *redir_create_node(char *path, int type) {
-    t_redir *redir_q;
+Redirection *redir_create_node(char *path, int type) {
+    Redirection *redir_q;
 
     if (!path) {
         return NULL;
     }
 
-    redir_q = (t_redir *)malloc(sizeof(t_redir));
+    redir_q = (Redirection *)malloc(sizeof(Redirection));
     if (!redir_q) {
         return NULL;
     }
@@ -142,9 +142,9 @@ t_redir *redir_create_node(char *path, int type) {
     return (redir_q);
 }
 
-void mx_redir_push_back(t_redir **redir_head, char *path, int type) {
-    t_redir *redir_q;
-    t_redir *redir_p;
+void mx_redir_push_back(Redirection **redir_head, char *path, int type) {
+    Redirection *redir_q;
+    Redirection *redir_p;
 
     if (!redir_head || !path) {
         return;
@@ -168,9 +168,9 @@ void mx_redir_push_back(t_redir **redir_head, char *path, int type) {
     }
 }
 
-void mx_redir_clear_list(t_redir **list) {
-    t_redir *redir_q = *list;
-    t_redir *redir_temp = NULL;
+void mx_redir_clear_list(Redirection **list) {
+    Redirection *redir_q = *list;
+    Redirection *redir_temp = NULL;
 
     if (!(*list) || !list) {
         return;

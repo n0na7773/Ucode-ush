@@ -20,7 +20,7 @@ char *replace_sub(char *str, char *sub, char *replace) {
     return(result);
 }
 
-char *chpwd(char **args, int option_num, t_shell *shell) {
+char *chpwd(char **args, int option_num, Prompt *shell) {
     char *current = strdup(shell->pwd);
     char *new = NULL;
 
@@ -58,7 +58,7 @@ int cd_count_args(char **args, int option_num) {
     return args_num;
 }
 
-int mx_cd(t_shell *shell, t_process *p) {
+int mx_cd(Prompt *shell, Process *p) {
     cd_t cd_options = {0, 0, 0};
     int exit_point = 1;
     int option_num = mx_count_options(p->argv, "sLP", "cd", " [-s] [-L|-P] [dir]");
@@ -78,7 +78,7 @@ int mx_cd(t_shell *shell, t_process *p) {
     return exit_point;
 }
 
-void manage_env(char *dir, t_shell *shell,  cd_t cd_options, int *exit_code) {
+void manage_env(char *dir, Prompt *shell,  cd_t cd_options, int *exit_code) {
     
     char *link = malloc(1024);
     readlink(dir, link, 1024);
@@ -123,7 +123,7 @@ int cd_check_path(char *pointer, cd_t cd_options) {
     return flag;
 }
 
-void mx_change_dir(char *pointer, cd_t cd_options, t_shell *shell, int *exit_code){
+void mx_change_dir(char *pointer, cd_t cd_options, Prompt *shell, int *exit_code){
     char *dir = mx_normalization(pointer, shell->pwd);
     int flag = cd_check_path(pointer, cd_options);
 
@@ -140,7 +140,7 @@ void mx_change_dir(char *pointer, cd_t cd_options, t_shell *shell, int *exit_cod
     if (getenv("HOME")) shell->git = mx_get_git_info();
 }
 
-char *mx_go_somewere(t_process *p, int option_num) {
+char *mx_go_somewere(Process *p, int option_num) {
     char *pointer = NULL;
 
     if (strcmp(p->argv[option_num + 1], "-") == 0)

@@ -20,8 +20,8 @@ static int check_identifier(char *arg) {
     return flag;
 }
 
-void delete_name(t_export **list, char *arg) {
-    t_export *head = *list;
+void delete_name(Export **list, char *arg) {
+    Export *head = *list;
 
     if (strcmp(head->name, arg) == 0) {
         *list = (*list)->next;
@@ -39,7 +39,7 @@ void delete_name(t_export **list, char *arg) {
     }
 }
 
-void unset_or_error(t_shell *shell, char *arg, int *exit_code) {
+void unset_or_error(Prompt *shell, char *arg, int *exit_code) {
     int flag = check_identifier(arg);
 
     if (flag) {
@@ -55,7 +55,7 @@ void unset_or_error(t_shell *shell, char *arg, int *exit_code) {
     }
 }
 
-int mx_unset(t_shell *shell, t_process *p) {
+int mx_unset(Prompt *shell, Process *p) {
     int exit_code = 0;
     int n_options = mx_count_options(p->argv, "", "unset", " [name ...] ");
     int i = 0;

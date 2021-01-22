@@ -11,7 +11,7 @@ void fill_options(int options, which_t *w_options, char **args) {
     }
 }
 
-int mx_which(t_shell *m_s, t_process *p) {
+int mx_which(Prompt *m_s, Process *p) {
     which_t w_options = {0, 0};
     int options = mx_count_options(p->argv, "as",
                                      "which", " [-as] program ...");
@@ -95,7 +95,7 @@ void mx_clear_list1(t_list **list) {
     *list = NULL;
 }
 
-void mx_get_command_info(t_shell *shell, char *command, int *flag, which_t options) {
+void mx_get_command_info(Prompt *shell, char *command, int *flag, which_t options) {
 	t_list *output= NULL;
     char *path = getenv("PATH");
     char **arr = NULL;

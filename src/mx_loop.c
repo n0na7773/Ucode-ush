@@ -1,7 +1,7 @@
 #include "ush.h"
 
-int get_job_type(t_ast **ast_arr, int i) {
-    t_ast *ast_temp = NULL;
+int get_job_type(Abstract **ast_arr, int i) {
+    Abstract *ast_temp = NULL;
 
     if (i != 0) {
         ast_temp = ast_arr[i - 1];
@@ -16,8 +16,8 @@ int get_job_type(t_ast **ast_arr, int i) {
     return 0;
 }
 
-void launch_blow_job(t_shell *shell, t_ast **ast_arr) {
-    t_job *new_job = NULL;
+void launch_blow_job(Prompt *shell, Abstract **ast_arr) {
+    Job *new_job = NULL;
 
     for (int i = 0; ast_arr[i]; i++) {
         if ((new_job = mx_create_job(shell, ast_arr[i]))) {
@@ -29,9 +29,9 @@ void launch_blow_job(t_shell *shell, t_ast **ast_arr) {
     mx_ast_clear_all(&ast_arr);
 }
 
-void mx_ush_loop(t_shell *shell) {
+void mx_ush_loop(Prompt *shell) {
     char *str = NULL;
-    t_ast **ast_arr = NULL;
+    Abstract **ast_arr = NULL;
 
     getenv("HOME") ? shell->git = mx_get_git_info() : 0;
     

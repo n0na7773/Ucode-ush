@@ -75,7 +75,7 @@ char *error_getter_bin(char **name, char *command, int *status) {
     return error;
 }
 
-static void child_wrk(t_shell *shell, t_process *p_process, int job_id, int child_pid) {
+static void child_wrk(Prompt *shell, Process *p_process, int job_id, int child_pid) {
     int shell_is_interactive = isatty(STDIN_FILENO);
 
     if (shell_is_interactive) {
@@ -103,7 +103,7 @@ static void child_wrk(t_shell *shell, t_process *p_process, int job_id, int chil
     exit(p_process->status);
 }
 
-int mx_launch_process(t_shell *shell, t_process *p_process, int job_id) {
+int mx_launch_process(Prompt *shell, Process *p_process, int job_id) {
     int shell_is_interactive = isatty(STDIN_FILENO);
     pid_t child_pid;
 
@@ -131,8 +131,8 @@ int mx_launch_process(t_shell *shell, t_process *p_process, int job_id) {
     return p_process->status >> 8;
 }
 
-static t_process *init_process(t_ast *list) {
-    t_process *process = (t_process *)malloc(sizeof(t_process));
+static Process *init_process(Abstract *list) {
+    Process *process = (Process *)malloc(sizeof(Process));
 
     if (!process) {
         return NULL;
@@ -162,9 +162,9 @@ static t_process *init_process(t_ast *list) {
     return process;
 }
 
-static t_process *create_process(t_shell *shell, t_ast *list) {
-    t_ast *t = list->left;
-    t_process *process;
+static Process *create_process(Prompt *shell, Abstract *list) {
+    Abstract *t = list->left;
+    Process *process;
     int index = 0;
 
     if (!(process = init_process(list))) {
@@ -181,7 +181,7 @@ static t_process *create_process(t_shell *shell, t_ast *list) {
             process->output_path = mx_strdup(t->args[0]);
         }
 
-        for (t_ast *q = list->left; q; q = q->next) {
+        for (Abstract *q = list->left; q; q = q->next) {
             if (q->args || ((q->args = mx_filters(q->token, shell)) && *(q->args))) {
                 mx_redir_push_back(&process->redirect, q->args[0], q->type);
             }
@@ -198,9 +198,9 @@ static t_process *create_process(t_shell *shell, t_ast *list) {
     return process;
 }
 
-void mx_push_process_back(t_process **process, t_shell *shell, t_ast *list) {
-    t_process *tmp;
-    t_process *process_tmp;
+void mx_push_process_back(Process **process, Prompt *shell, Abstract *list) {
+    Process *tmp;
+    Process *process_tmp;
 
     if (!process || !shell || !list)
         return;
@@ -222,7 +222,7 @@ void mx_push_process_back(t_process **process, t_shell *shell, t_ast *list) {
     }
 }
 
-void mx_clear_process(t_process *process) {
+void mx_clear_process(Process *process) {
     if (!process)
         return;
     mx_del_strarr(&process->argv);
@@ -272,7 +272,7 @@ void print_error_env(char *command, char *error) {
     }
 }
 
-void child_process(t_process *p_process, char *path, char **env, int *status_arr) {
+void child_process(Process *p_process, char *path, char **env, int *status_arr) {
     char *const *envp =  env;
     char *command = p_process->argv[0];
     char **arr = mx_strsplit(path, ':');
@@ -293,7 +293,7 @@ void child_process(t_process *p_process, char *path, char **env, int *status_arr
     exit(0);
 }
 
-int mx_launch_bin(t_process *p_process, char *path, char **env) {
+int mx_launch_bin(Process *p_process, char *path, char **env) {
     pid_t pid;
     int status = 1;
 
@@ -311,7 +311,7 @@ int mx_launch_bin(t_process *p_process, char *path, char **env) {
     return status >> 8;
 }
 
-void mx_dup_fd(t_process *p_process) {
+void mx_dup_fd(Process *p_process) {
     
     if (p_process->errfile != STDERR_FILENO) {
         dup2(p_process->errfile, STDERR_FILENO);
@@ -351,7 +351,7 @@ void mx_dup2_fd(int *fd1, int *fd2) {
     }
 }
 
-void mx_print_fd(t_process  *p_process) {
+void mx_print_fd(Process  *p_process) {
     printf("\x1B[32m p->r_input \x1B[0m\t");
 
     for(int i = 0; i < p_process->c_input; i ++) {

@@ -25,7 +25,7 @@ static void fill_options(char **args, echo_t *echo_options, int option_num) {
     }
 }
 
-static void edit_argv(int option_num, t_process *proc) {
+static void edit_argv(int option_num, Process *proc) {
     echo_t echo_options = {0, 0, 0};
 
     fill_options(proc->argv, &echo_options, option_num);
@@ -38,7 +38,7 @@ static void edit_argv(int option_num, t_process *proc) {
     if(!echo_options.n) printf("\n");
 }
 
-int mx_echo(t_shell *m_s, t_process *proc) {
+int mx_echo(Prompt *m_s, Process *proc) {
     m_s->exit_code = 0;
     int exit_code = m_s->exit_code;
     int option_num = count_options(proc->argv);
@@ -102,7 +102,7 @@ static char *replace_slash(char *str, echo_t *echo_options) {
     return result;
 }
 
-void mx_escape_seq(t_process *proc, int i, echo_t echo_options) {
+void mx_escape_seq(Process *proc, int i, echo_t echo_options) {
     char *tmp = replace_slash(proc->argv[i], &echo_options);
     char *sequenses[] = {"\\a","\\b","\\f","\\n","\\r","\\t","\\v",NULL};
     char *escape[] = {"\a","\b","\f","\n","\r","\t","\v",NULL};

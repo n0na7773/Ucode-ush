@@ -1,6 +1,6 @@
 #include "ush.h"
 
-int mx_chdir(t_shell *shell, t_process *p) {
+int mx_chdir(Prompt *shell, Process *p) {
     cd_t cd_options = {0, 0, 0};
     int exit_point = 1;
     int option_num = mx_count_options(p->argv, "sLP", "chdir", " [-s] [-L|-P] [dir]");

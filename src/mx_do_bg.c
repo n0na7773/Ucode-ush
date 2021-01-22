@@ -11,7 +11,7 @@ void mx_err_j(char *arg1, char *arg2, char *arg3, char *arg4) {
     mx_strdel(&error);
 }
 
-int mx_check_args(t_shell *shell, t_process *proces) {
+int mx_check_args(Prompt *shell, Process *proces) {
     int id_job;
 
     if (proces->argv[1][0] == '%' && isdigit(proces->argv[1][1])) {
@@ -33,7 +33,7 @@ int mx_check_args(t_shell *shell, t_process *proces) {
     return id_job;
 }
 
-int mx_bg_get_job_id(t_shell *shell, t_process *proces) {
+int mx_bg_get_job_id(Prompt *shell, Process *proces) {
     int id_job;
     int args = 0;
 
@@ -50,7 +50,7 @@ int mx_bg_get_job_id(t_shell *shell, t_process *proces) {
     return id_job;
 }
 
-int mx_bg(t_shell *shell, t_process *proces) {
+int mx_bg(Prompt *shell, Process *proces) {
     pid_t p_gid = 0;
     int id_job = 0;
 

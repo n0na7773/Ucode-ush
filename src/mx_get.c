@@ -40,7 +40,7 @@ char *get_func_value(char *line, int end) {
     return value;
 }
 
-bool mx_get_functions(char *line, t_shell *shell) {
+bool mx_get_functions(char *line, Prompt *shell) {
     char *var;
     char *value;
     int i = mx_get_char_index_quote(line, "(", "\"\'`$");
@@ -105,7 +105,7 @@ char *mx_get_git_info(void) {
     return usr;
 }
 
-void key_add_char(int *pos, char *line, int keycode, t_shell *shell) {
+void key_add_char(int *pos, char *line, int keycode, Prompt *shell) {
     if (mx_strlen(line) >= shell->line_len) {
         shell->line_len += 1024;
         line = realloc(line, shell->line_len);
@@ -121,13 +121,13 @@ void key_read_input(int *max_len, int *keycode, char *line) {
     read(0, keycode, 4);
 }
 
-void key_choose (int *pos, char **line, int keycode, t_shell *shell) {
+void key_choose (int *pos, char **line, int keycode, Prompt *shell) {
     if (keycode >= 127) mx_edit_command(keycode, pos, line, shell);
     else if (keycode < 32)  mx_exec_signal(keycode, line, pos, shell);
     else key_add_char(pos, *line, keycode, shell);
 }
 
-void key_print_command(t_shell *shell, char *line, int pos, int max_len){
+void key_print_command(Prompt *shell, char *line, int pos, int max_len){
     for (int i = pos; i <= mx_strlen(line); i++) printf (" ");
     for (int i = 0; i <= max_len + 2; i++) printf ("\b\x1b[2K");
     printf ("\r");
@@ -137,7 +137,7 @@ void key_print_command(t_shell *shell, char *line, int pos, int max_len){
     fflush (NULL);
 }
 
-char *mx_get_keys(t_shell *shell) {
+char *mx_get_keys(Prompt *shell) {
     char *line = mx_strnew(1024);
     int keycode = 0;
     int max_len = 0;
@@ -168,7 +168,7 @@ struct termios mx_disable_term(void) {
     return econ;
 }
 
-void line_jynx_maze(t_shell *shell, char *line) {
+void line_jynx_maze(Prompt *shell, char *line) {
     if (shell->history_count == shell->history_size) {
         shell->history_size += 1000;
         shell->history = (char **)realloc(shell->history, shell->history_size);
@@ -180,7 +180,7 @@ void line_jynx_maze(t_shell *shell, char *line) {
     }
 }
 
-char *mx_get_line(t_shell *shell) {
+char *mx_get_line(Prompt *shell) {
     char *line;
     struct termios econ;
     int out = dup(1);
@@ -362,7 +362,7 @@ void get_aliases_data(char *arg, char **name, char **value) {
     }
 }
 
-void mx_get_aliases(char *line, t_shell *shell) {
+void mx_get_aliases(char *line, Prompt *shell) {
     char **args = mx_parce_tokens(line);
     for (int i = 0; args[i]; i++) {
         char *name = NULL;
