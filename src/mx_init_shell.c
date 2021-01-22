@@ -1,5 +1,69 @@
 #include "ush.h"
 
+void set_path(t_shell *shell) {
+    char *path = NULL;
+    char *dir = getcwd(NULL, 256);
+    shell->kernal = mx_strjoin(dir, "/ush");
+
+    if (!getenv("PATH")) {
+        path = strdup("/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:");
+        path = mx_strjoin_free(path, "/usr/local/munki");
+    }
+    else  {
+        path = strdup(getenv("PATH"));
+    }
+
+    setenv("PATH", path, 1);
+
+    free(dir);
+    free(path);
+}
+
+void set_shell_defaults(t_shell *shell) {
+    char *b_list[19] = {"env", "export", "unset", "echo", "jobs", "fg", "bg",
+                        "cd", "pwd", "which", "exit", "set", "kill", "chdir",
+                        "true", "alias", "declare", "false", NULL};
+    shell->builtin_list = (char **) malloc(sizeof(char *) * 19);
+
+    for (int i = 0; i < 19; i++) {
+        shell->builtin_list[i] = b_list[i]; 
+    }
+    
+    shell->exit_flag = 0;
+    shell->history_count = 0;
+    shell->max_number_job = 1;
+    shell->history_size = 1000;
+    shell->history = (char **)malloc(sizeof(char *) * shell->history_size);
+
+    for (int i = -1; i < MX_JOBS_NUMBER; ++i) {
+        shell->jobs[i] = NULL;
+    }
+    
+    shell->aliases = NULL;
+    shell->functions = NULL;
+
+    mx_init_jobs_stack(shell);
+    set_path(shell);
+}
+
+char *get_pwd() {
+    char *pwd = getenv("PWD");
+    char *cur_dir = getcwd(NULL, 256);
+    char *read_link = realpath(pwd, NULL);
+
+    if (strcmp(cur_dir, read_link) == 0 && read_link){
+        pwd = strdup(getenv("PWD"));
+        free(cur_dir);
+        free(read_link);
+    }
+    else {
+        pwd = strdup(cur_dir);
+        free(cur_dir);
+    }
+
+    return pwd;
+}
+
 t_shell *mx_init_shell(int argc, char **argv) {
     char *shlvl;
     t_shell *shell = (t_shell *) malloc(sizeof(t_shell));
@@ -150,6 +214,11 @@ char *mx_get_shlvl(void) {
     lvl++;
     shlvl = mx_itoa(lvl);
     return shlvl;
+}
+static void exit_ush(t_shell *shell) {
+    printf("exit\n");
+    mx_clear_all(shell);
+    exit(EXIT_SUCCESS);
 }
 
 void mx_exec_signal(int keycode, char **line, int *position, t_shell *shell) {
@@ -587,3 +656,4 @@ void mx_set_process_status(t_shell *shell, int pid, int status) {
         }
     }
 }
+

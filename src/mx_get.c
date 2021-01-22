@@ -1,39 +1,8 @@
 #include "ush.h"
 
-char *get_pwd() {
-    char *pwd = getenv("PWD");
-    char *cur_dir = getcwd(NULL, 256);
-    char *read_link = realpath(pwd, NULL);
-
-    if (strcmp(cur_dir, read_link) == 0 && read_link){
-        pwd = strdup(getenv("PWD"));
-        free(cur_dir);
-        free(read_link);
-    }
-    else {
-        pwd = strdup(cur_dir);
-        free(cur_dir);
-    }
-
-    return pwd;
-}
-
-void read_dir(char *dir_name, char *command, int *flag, char **name_arr) {
-    struct dirent  *ds;
-    DIR *dptr = opendir(dir_name);
-
-    if (dptr != NULL) {
-        for (;(ds = readdir(dptr)) != 0;) {
-            if (strcmp(ds->d_name, command) == 0 && command[0] != '.') {
-                (*flag)++;
-                char *temp = mx_strjoin(dir_name, "/");
-                *name_arr = mx_strjoin(temp, command);
-                free(temp);
-                break;
-            }
-        }
-        closedir(dptr);
-    }
+char *usage_func_error(void) {
+    mx_printerr("ush: function usage: func() { ...; }\n");
+    return NULL;
 }
 
 int mx_get_char_index_reverse(const char *str, char c) {
@@ -260,30 +229,6 @@ static int get_delim(char *line, int *pos) {
     return type;
 }
 
-char *get_dir(char *point, char *pwd) {
-    char *cur_dir = strdup(pwd);
-    char *dir = NULL;
-    char **arr_str = NULL;
-
-    if (point[0] == '/') {
-        dir = strdup(point);
-    }
-    else {
-        char *temp = mx_strjoin(cur_dir, "/");
-        free(dir);
-        dir = mx_strjoin(temp,point);
-        free(temp);
-    }
-
-    arr_str = get_arr(dir);
-    free(dir);
-    dir = fill_dir(arr_str);
-    mx_del_strarr(&arr_str);
-    free(cur_dir);
-
-    return dir;
-}
-
 void delete_index(char **arr, int i) {
     free(arr[i]);
     arr[i] = strdup("");
@@ -332,6 +277,30 @@ char *fill_dir(char **arr_str) {
     if (!dir) {
         dir = strdup("/");
     }
+
+    return dir;
+}
+
+char *get_dir(char *point, char *pwd) {
+    char *cur_dir = strdup(pwd);
+    char *dir = NULL;
+    char **arr_str = NULL;
+
+    if (point[0] == '/') {
+        dir = strdup(point);
+    }
+    else {
+        char *temp = mx_strjoin(cur_dir, "/");
+        free(dir);
+        dir = mx_strjoin(temp,point);
+        free(temp);
+    }
+
+    arr_str = get_arr(dir);
+    free(dir);
+    dir = fill_dir(arr_str);
+    mx_del_strarr(&arr_str);
+    free(cur_dir);
 
     return dir;
 }

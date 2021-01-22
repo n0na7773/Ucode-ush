@@ -13,6 +13,28 @@ char *get_parameter(char **args, int *indx, int j_index, int *option_n) {
     return param;
 }
 
+int add_parameter(char *param, t_export **env_params, char option) {
+    char *tmp_option = malloc(2*sizeof(char));;
+
+    if (param) {
+        if (mx_strchr(param, '=') && option == 'u') {
+            mx_printerr("env: unsetenv ");
+            mx_printerr(param);
+            mx_printerr(": Invalid argument\n");
+            return -1;
+        }
+        tmp_option[0] = option;
+        tmp_option[1] = '\0';
+        mx_push_export(env_params, tmp_option, param);
+        free(param);
+        free(tmp_option);
+        return 0;
+    } else {
+        mx_print_env_error(option, "env: option requires an argument -- ");
+        return -1;
+    }
+}
+
 int mx_add_option(char **args, int *i, int *option_n, t_env_builtin *env) {
     int flag = 1;
     char *parametr = NULL;

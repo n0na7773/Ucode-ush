@@ -1,5 +1,23 @@
 #include "ush.h"
 
+void read_dir(char *dir_name, char *command, int *flag, char **name_arr) {
+    struct dirent  *ds;
+    DIR *dptr = opendir(dir_name);
+
+    if (dptr != NULL) {
+        for (;(ds = readdir(dptr)) != 0;) {
+            if (strcmp(ds->d_name, command) == 0 && command[0] != '.') {
+                (*flag)++;
+                char *temp = mx_strjoin(dir_name, "/");
+                *name_arr = mx_strjoin(temp, command);
+                free(temp);
+                break;
+            }
+        }
+        closedir(dptr);
+    }
+}
+
 char *check_path_launch_process(char **arr_str, char *command) {
     int i = 0;
     int flag = 0;
@@ -10,6 +28,51 @@ char *check_path_launch_process(char **arr_str, char *command) {
         i++;
     }
     return name;
+}
+
+char *error_getter(char **name_arr, char *command, int *status) {
+    *status = 127;
+    char *error = NULL;
+
+    if (strstr(command, "/")) {
+        struct stat buff;
+        *name_arr = command;
+
+        if (lstat(*name_arr, &buff) < 0) {
+            error = NULL;
+        }
+        else {
+            if (mx_get_type(buff) == 'd') {
+                error = strdup("is a directory: ");
+                *status = 126;
+            }
+        }
+    }
+    else {
+        error = strdup("command not found: ");
+    }
+    
+    return error;
+}
+
+char *error_getter_bin(char **name, char *command, int *status) {
+    char *error = NULL;
+
+    *status = 127;
+    if (strstr(command, "/")) {
+        struct stat buff;
+        *name = command;
+        if (lstat(*name, &buff) < 0) {
+            error = NULL;
+        }
+        else {
+            if (mx_get_type(buff) == 'd') {
+                error = strdup(": is a directory\n");
+                *status = 126;
+            }
+        }
+    }
+    return error;
 }
 
 static void child_wrk(t_shell *shell, t_process *p_process, int job_id, int child_pid) {
@@ -194,6 +257,19 @@ char *check_path_launch_process_bin(char **arr_str, char *command) {
         }
     }
     return name;
+}
+
+void print_error_env(char *command, char *error) {
+    mx_printerr("env: ");
+
+    if (error) {
+        mx_printerr(command);
+        mx_printerr(error);
+        free(error);
+    }
+    else {
+        perror(command);
+    }
 }
 
 void child_process(t_process *p_process, char *path, char **env, int *status_arr) {

@@ -99,11 +99,6 @@ void mx_sig_h(int signal) {
     }
 }
 
-char *usage_func_error(void) {
-    mx_printerr("ush: function usage: func() { ...; }\n");
-    return NULL;
-}
-
 void mx_print_error(char *command, char *error) {
     mx_printerr("ush: ");
     if (error) {
@@ -112,62 +107,4 @@ void mx_print_error(char *command, char *error) {
     }
     else
         perror(command);
-}
-
-char *error_getter(char **name_arr, char *command, int *status) {
-    *status = 127;
-    char *error = NULL;
-
-    if (strstr(command, "/")) {
-        struct stat buff;
-        *name_arr = command;
-
-        if (lstat(*name_arr, &buff) < 0) {
-            error = NULL;
-        }
-        else {
-            if (mx_get_type(buff) == 'd') {
-                error = strdup("is a directory: ");
-                *status = 126;
-            }
-        }
-    }
-    else {
-        error = strdup("command not found: ");
-    }
-    
-    return error;
-}
-
-char *error_getter_bin(char **name, char *command, int *status) {
-    char *error = NULL;
-
-    *status = 127;
-    if (strstr(command, "/")) {
-        struct stat buff;
-        *name = command;
-        if (lstat(*name, &buff) < 0) {
-            error = NULL;
-        }
-        else {
-            if (mx_get_type(buff) == 'd') {
-                error = strdup(": is a directory\n");
-                *status = 126;
-            }
-        }
-    }
-    return error;
-}
-
-void print_error_env(char *command, char *error) {
-    mx_printerr("env: ");
-
-    if (error) {
-        mx_printerr(command);
-        mx_printerr(error);
-        free(error);
-    }
-    else {
-        perror(command);
-    }
 }

@@ -101,28 +101,6 @@ static void get_data (char *arg, char **name, char **value, t_export *var) {
     }
 }
 
-int add_parameter(char *param, t_export **env_params, char option) {
-    char *tmp_option = malloc(2*sizeof(char));;
-
-    if (param) {
-        if (mx_strchr(param, '=') && option == 'u') {
-            mx_printerr("env: unsetenv ");
-            mx_printerr(param);
-            mx_printerr(": Invalid argument\n");
-            return -1;
-        }
-        tmp_option[0] = option;
-        tmp_option[1] = '\0';
-        mx_push_export(env_params, tmp_option, param);
-        free(param);
-        free(tmp_option);
-        return 0;
-    } else {
-        mx_print_env_error(option, "env: option requires an argument -- ");
-        return -1;
-    }
-}
-
 void mx_export_or_error(char *arg, t_export *export, t_export *var, int *exit_index) {
     int flag = check_identifier(arg);
 

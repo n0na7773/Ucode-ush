@@ -120,9 +120,3 @@ void mx_ast_clear_all(t_ast ***list) {
     free(tmtmp_exp);
     tmtmp_exp = NULL;
 }
-
-static void exit_ush(t_shell *shell) {
-    printf("exit\n");
-    mx_clear_all(shell);
-    exit(EXIT_SUCCESS);
-}

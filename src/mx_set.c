@@ -1,51 +1,5 @@
 #include "ush.h"
 
-void set_path(t_shell *shell) {
-    char *path = NULL;
-    char *dir = getcwd(NULL, 256);
-    shell->kernal = mx_strjoin(dir, "/ush");
-
-    if (!getenv("PATH")) {
-        path = strdup("/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:");
-        path = mx_strjoin_free(path, "/usr/local/munki");
-    }
-    else  {
-        path = strdup(getenv("PATH"));
-    }
-
-    setenv("PATH", path, 1);
-
-    free(dir);
-    free(path);
-}
-
-void set_shell_defaults(t_shell *shell) {
-    char *b_list[19] = {"env", "export", "unset", "echo", "jobs", "fg", "bg",
-                        "cd", "pwd", "which", "exit", "set", "kill", "chdir",
-                        "true", "alias", "declare", "false", NULL};
-    shell->builtin_list = (char **) malloc(sizeof(char *) * 19);
-
-    for (int i = 0; i < 19; i++) {
-        shell->builtin_list[i] = b_list[i]; 
-    }
-    
-    shell->exit_flag = 0;
-    shell->history_count = 0;
-    shell->max_number_job = 1;
-    shell->history_size = 1000;
-    shell->history = (char **)malloc(sizeof(char *) * shell->history_size);
-
-    for (int i = -1; i < MX_JOBS_NUMBER; ++i) {
-        shell->jobs[i] = NULL;
-    }
-    
-    shell->aliases = NULL;
-    shell->functions = NULL;
-
-    mx_init_jobs_stack(shell);
-    set_path(shell);
-}
-
 int options_count(char **args) {
     int n_options = 0;
 
@@ -244,12 +198,12 @@ void mx_set_r_outfile(t_shell *shell, t_job *job, t_process *p_process) {
     job->outfile = p_process->r_outfile[0];
 }
 
-/*static char *strdup_from(char *str, int index) {
+static char *strdup_from(char *str, int index) {
     for (int i = 0; i <= index; i++) {
         str++;
     }
     return strdup(str);
-}*/
+}
 
 static void get_data (char *arg, char **name, char **value) {
     int idx = mx_get_char_index(arg,'=');
