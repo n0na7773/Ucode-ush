@@ -572,7 +572,7 @@ int execute_job (Prompt *shell, Job * job, int job_id) {
 
     execute_job_env(job);
     for (p_process = shell->jobs[job_id]->first_pr; p_process; p_process = p_process->next) {
-        mx_sheck_exit(shell, p_process);
+        mx_check_exit(shell, p_process);
 
         if (p_process->pipe){
             m_pipe(shell, job, mypipe, job_id);

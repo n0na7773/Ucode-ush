@@ -8,7 +8,32 @@ static int count_sep_first_lwl(Abstract *q_ast) {
             i++;
     return i;
 }
+void mx_ast_clear_list(Abstract **list) {
+    if (!(*list) || !list) return;
 
+    Abstract *tmtmp_exp = *list;
+    Abstract *tmp = NULL;
+
+    while (tmtmp_exp) {
+        if (tmtmp_exp->token) free(tmtmp_exp->token);
+        if (tmtmp_exp->args) mx_del_strarr(&tmtmp_exp->args);
+        if (tmtmp_exp->left) mx_ast_clear_list(&tmtmp_exp->left);
+
+        tmp = tmtmp_exp->next;
+        free(tmtmp_exp);
+        tmtmp_exp = tmp;
+    }
+    *list = NULL;
+}
+
+void mx_ast_clear_all(Abstract ***list) {
+    Abstract **tmtmp_exp = *list;
+
+    for (int i = 0; tmtmp_exp[i]; i++) mx_ast_clear_list(&tmtmp_exp[i]);
+
+    free(tmtmp_exp);
+    tmtmp_exp = NULL;
+}
 Abstract *push_redirections(Abstract **q_ast_arr, Abstract **ast) {
     int temp_type;
     Abstract *c = (*q_ast_arr)->next;

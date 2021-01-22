@@ -196,7 +196,7 @@ int mx_get_flag(char **args) {
     return flag;
 }
 
-void mx_sheck_exit(Prompt *shell, Process *p) {
+void mx_check_exit(Prompt *shell, Process *p) {
     mx_set_variable(shell->variables, "_", p->argv[0]);
     setenv("_", p->argv[0], 1);
     if (shell->exit_flag == 1 && !(p->type == 10))

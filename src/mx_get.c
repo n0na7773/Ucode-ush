@@ -202,33 +202,6 @@ char *mx_get_line(Prompt *shell) {
     return line;
 }
 
-static int get_type(char *delim) {
-    if (MX_IS_SEP(delim)) return SEP;
-    else if (MX_IS_FON(delim)) return FON;
-    else if (MX_IS_AND(delim)) return AND;
-    else if (MX_IS_OR(delim)) return OR;
-    else if (MX_IS_PIPE(delim)) return PIPE;
-    else if (MX_IS_R_INPUT(delim)) return R_INPUT;
-    else if (MX_IS_R_INPUT_DBL(delim)) return R_INPUT_DBL;
-    else if (MX_IS_R_OUTPUT(delim)) return R_OUTPUT;
-    else if (MX_IS_R_OUTPUT_DBL(delim)) return R_OUTPUT_DBL;
-    return NUL;
-}
-
-static int get_delim(char *line, int *pos) {
-    char *delim = NULL;
-    int type = 0;
-
-    if (line[0] && mx_isdelim(line[0], MX_PARSE_DELIM)) {
-        if (line[1] && mx_isdelim(line[1], MX_PARSE_DELIM)) delim = mx_strndup(line, 2);
-        else delim = mx_strndup(line, 1);
-    }
-    type = get_type(delim);
-    if (delim)  *pos += mx_strlen(delim);
-    mx_strdel(&delim);
-    return type;
-}
-
 void delete_index(char **arr, int i) {
     free(arr[i]);
     arr[i] = strdup("");
@@ -310,24 +283,6 @@ char *mx_normalization (char *point, char *pwd) {
     char *str = NULL;
     str = get_dir(point, pwd);
     return str;
-}
-
-char *mx_get_token_and_delim(char *line, int *indx, int *type) {
-    int pos = 0;
-    char *temp = NULL;
-
-    if ((pos = mx_get_char_index_quote(&line[pos], MX_PARSE_DELIM, MX_QUOTE)) > 0) {
-        temp = mx_strndup(line, pos);
-        *type = get_delim(line + pos, &pos);
-        *indx += pos;
-    } else if (pos == 0) {
-        (*indx)++;
-    } else {
-        temp = mx_strdup(line);
-        *type = SEP;
-        *indx += mx_strlen(line);
-    }
-    return temp;
 }
 
 char mx_get_type(struct stat file_stat) {

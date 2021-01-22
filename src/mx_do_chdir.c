@@ -12,7 +12,7 @@ int mx_chdir(Prompt *shell, Process *p) {
     if (option_num >= 0 && args_num < 3) {
         if (args_num == 0) point = mx_go_home();
         else if (args_num == 2) point = chpwd(p->argv, option_num, shell);
-        else point = mx_go_somewere(p, option_num);
+        else point = mx_go_somewhere(p, option_num);
         
         if (point != NULL) mx_change_dir(point, cd_options, shell, &exit_point);
         free(point);
