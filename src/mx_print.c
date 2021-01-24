@@ -3,7 +3,7 @@
 void mx_print_color(char *macros, char *str) {
     mx_printstr(macros);
     mx_printstr(str);
-    mx_printstr(RESET);
+    mx_printstr(MX_RESET);
 }
 
 void mx_print_strarr_in_line(char **result, const char *delim) {

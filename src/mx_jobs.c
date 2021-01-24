@@ -77,7 +77,7 @@ int mx_jobs(Prompt *shell, Process *p_process) {
     options_fill(n_opt, &jobs_op, p_process->argv);
 
     if (n_args == 0 && n_opt >= 0) {
-        for (int i = 0; i < MX_JOBS_NUMBER; i++) {
+        for (int i = 0; i < 5000; i++) {
             print_jobs_by_mask(shell, jobs_op, i);
         }
     }
@@ -114,7 +114,7 @@ int mx_insert_job(Prompt *shell, Job *job) {
 }
 
 void mx_remove_job(Prompt *shell, int job_id) {
-    if (shell->jobs[job_id] == NULL || job_id > MX_JOBS_NUMBER) {
+    if (shell->jobs[job_id] == NULL || job_id > 5000) {
         return;
     }
 
@@ -128,7 +128,7 @@ void mx_remove_job(Prompt *shell, int job_id) {
 }
 
 void mx_remove_job_from_panel(Prompt *shell, int job_id) {
-    if (job_id > MX_JOBS_NUMBER || shell->jobs[job_id] == NULL) {
+    if (job_id > 5000 || shell->jobs[job_id] == NULL) {
         return;
     }
 
@@ -160,7 +160,7 @@ int mx_job_id_by_pid(Prompt *shell, int pid) {
 int mx_set_job_status(Prompt *shell, int job_id, int status) {
     Process *p_process;
 
-    if (job_id > MX_JOBS_NUMBER || shell->jobs[job_id] == NULL) {
+    if (job_id > 5000 || shell->jobs[job_id] == NULL) {
         return -1;
     }
 
@@ -175,7 +175,7 @@ int mx_set_job_status(Prompt *shell, int job_id, int status) {
 int mx_job_completed(Prompt *shell, int job_id) {
     Process *p_process;
 
-    if (job_id > MX_JOBS_NUMBER || shell->jobs[job_id] == NULL) {
+    if (job_id > 5000 || shell->jobs[job_id] == NULL) {
         return -1;
     }
 
@@ -191,7 +191,7 @@ int mx_job_is_running(Prompt *shell, int job_id) {
     Process *p_process;
     int status = 0;
 
-    if (job_id > MX_JOBS_NUMBER || shell->jobs[job_id] == NULL) {
+    if (job_id > 5000 || shell->jobs[job_id] == NULL) {
         return -1;
     }
 
@@ -284,11 +284,11 @@ int mx_wait_job(Prompt *shell, int job_id) {
 
 void mx_init_jobs_stack(Prompt *shell) {
     Stack *st = malloc(sizeof(Stack));
-    st->size = MX_JOBS_NUMBER;
+    st->size = 5000;
     st->last = -1;
     st->prev_last = -1;
     st->top = -1;
-    st->stack = malloc(sizeof(int) * MX_JOBS_NUMBER);
+    st->stack = malloc(sizeof(int) * 5000);
 
     for (int i = 0; i < st->size; i++) {
         st->stack[i] = 0;
@@ -343,7 +343,7 @@ int mx_get_job_status(Prompt *shell, int job_id, int status) {
     Process *p;
     int flag = 0;
 
-    if (job_id > MX_JOBS_NUMBER || shell->jobs[job_id] == NULL) {
+    if (job_id > 5000 || shell->jobs[job_id] == NULL) {
         return -1;
     }
     for (p = shell->jobs[job_id]->first_pr; p != NULL; p = p->next) {
@@ -391,7 +391,7 @@ void mx_set_last_job(Prompt *shell) {
 }
 
 int mx_get_pgid_by_job_id(Prompt *shell, int job_id) {
-    if (job_id > MX_JOBS_NUMBER || shell->jobs[job_id] == NULL) {
+    if (job_id > 5000 || shell->jobs[job_id] == NULL) {
         return -1;
     }
     
@@ -430,7 +430,7 @@ void mx_print_job_status(Prompt *shell, int job_id, int flag) {
 
         printf("%s", status[p->status]);
         len = mx_strlen(status[p->status]);
-        print_spaces(MAX_LEN + 1 - len);
+        print_spaces(10 + 1 - len);
         mx_print_args_in_line(p->argv, " ");
         (p->next != NULL) ? mx_printstr(" |\n       ") : mx_printstr("\n");
     }
@@ -439,7 +439,7 @@ void mx_print_job_status(Prompt *shell, int job_id, int flag) {
 void mx_print_pid_process_in_job(Prompt *shell, int job_id) {
     Process *p_process;
 
-    if (shell->jobs[job_id] == NULL || job_id > MX_JOBS_NUMBER) {
+    if (shell->jobs[job_id] == NULL || job_id > 5000) {
         mx_printstr("error job_id");
         mx_printstr("\n");
     }

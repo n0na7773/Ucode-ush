@@ -35,7 +35,7 @@ void set_shell_defaults(Prompt *shell) {
     shell->history_size = 1000;
     shell->history = (char **)malloc(sizeof(char *) * shell->history_size);
 
-    for (int i = -1; i < MX_JOBS_NUMBER; ++i) {
+    for (int i = -1; i < 5000; ++i) {
         shell->jobs[i] = NULL;
     }
     
@@ -434,7 +434,7 @@ void mx_termios_restore(Prompt *shell) {
 void mx_termios_save(Prompt *shell) {
     if (tcgetattr(STDIN_FILENO, &shell->t_original) == -1) {
         mx_printerr("tcgetattr() failed");
-        exit(MX_EXIT_FAILURE);
+        exit(1);
     }
     shell->t_custom = shell->t_original;
     shell->t_custom.c_lflag &= ~(ECHO);
@@ -443,7 +443,7 @@ void mx_termios_save(Prompt *shell) {
     shell->t_custom.c_cc[VMIN] = 1;
     if (tcsetattr(STDIN_FILENO, TCSANOW, &shell->t_custom) == -1) {
         mx_printerr("tcsetattr() failed");
-        exit(MX_EXIT_FAILURE );
+        exit(1 );
     }
     shell->custom_terminal = TRUE;
 }
@@ -617,7 +617,7 @@ int mx_get_proc_count(Prompt *shell, int job_id, int filter) {
     Process *p_process;
     int count = 0;
 
-    if (job_id > MX_JOBS_NUMBER || shell->jobs[job_id] == NULL) {
+    if (job_id > 5000 || shell->jobs[job_id] == NULL) {
         return -1;
     }
 
