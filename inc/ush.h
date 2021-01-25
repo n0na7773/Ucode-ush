@@ -239,7 +239,7 @@ typedef struct _process {
 
 // Pipeline of processes
 typedef struct _job {
-    int     job_id;            // Number in jobs control
+    int     job_num;            // Number in jobs control
     int     job_type;          // 0 if normal, or enum &&, || of previos job
     char    *command;          // Command line, used for messages
     Process *first_pr;         // List of processes in this job
@@ -293,8 +293,8 @@ typedef struct _prompt {
 
 // mx_do_bg.c
 int mx_check_args(Prompt *, Process *);  // Used in fg and bg
-int mx_bg_get_job_id(Prompt *, Process *);
-void mx_err_j(char *, char *, char *, char *);
+int mx_bg_get_job_num(Prompt *, Process *);
+void mx_strjoin_arr(char *, char *, char *, char *);
 
 // mx_do_cd.c
 int cd_count_args(char **, int );
@@ -383,14 +383,14 @@ char **mx_filters(char *, Prompt *);
 // mx_jobs.c
 Job *mx_create_job(Prompt *, Abstract *);
 int mx_jobs(Prompt *, Process *);
-int mx_get_next_job_id(Prompt *);
+int mx_get_next_job_num(Prompt *);
 int mx_insert_job(Prompt *, Job *);
 int mx_set_job_status(Prompt *, int , int );
 int mx_get_job_status(Prompt *, int , int );
-int mx_g_find_job(Prompt *, char *);
+int mx_find_job(Prompt *, char *);
 int mx_job_is_running(Prompt *, int );
-int mx_job_id_by_pid(Prompt *, int );
-int mx_get_pgid_by_job_id(Prompt *, int );
+int mx_job_num_by_pid(Prompt *, int );
+int mx_get_pgid_by_job_num(Prompt *, int );
 int mx_job_completed(Prompt *, int );
 int mx_wait_job(Prompt *, int );	// Waitpid  in  group
 void mx_launch_job(Prompt *, Job *);

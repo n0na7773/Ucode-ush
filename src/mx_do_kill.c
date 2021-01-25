@@ -21,39 +21,39 @@ int kill_check_pid(char *str) {
 
 void kill_job(Prompt *shell, Process *p_process, int i) {
     int pgid;
-    int job_id;
+    int job_num;
 
-    if ((job_id = mx_check_args(shell, p_process)) < 1) {
+    if ((job_num = mx_check_args(shell, p_process)) < 1) {
         p_process->exit_code = 1;
         return;
     }
 
-    if ((pgid = mx_get_pgid_by_job_id(shell, job_id)) < 1) {
-        mx_err_j(p_process->argv[0], ": ", p_process->argv[i],": no such job\n");
+    if ((pgid = mx_get_pgid_by_job_num(shell, job_num)) < 1) {
+        mx_strjoin_arr(p_process->argv[0], ": ", p_process->argv[i],": no such job\n");
         p_process->exit_code = 1;
         return;
     }
 
     if (kill(-pgid, SIGTERM) < 0) {
-        mx_err_j(p_process->argv[0], ": job not found: ", p_process->argv[i], "\n");
+        mx_strjoin_arr(p_process->argv[0], ": job not found: ", p_process->argv[i], "\n");
         p_process->exit_code = 1;
     }
 
-    mx_set_job_status(shell, job_id, MX_STAT_TERMINATED);
+    mx_set_job_status(shell, job_num, MX_STAT_TERMINATED);
 }
 
 void kill_pid(Prompt *shell, Process *p_process, int i) {
     pid_t pid = 0;
 
     if ((kill_check_pid(p_process->argv[i])) > 0) {
-        mx_err_j(p_process->argv[0], ": illegal pid: ", p_process->argv[i], "\n");
+        mx_strjoin_arr(p_process->argv[0], ": illegal pid: ", p_process->argv[i], "\n");
         p_process->exit_code = 1;
         return;
     }
     else {
         pid = atoi(p_process->argv[i]);
         if (kill(pid, SIGTERM) < 0) {
-            mx_err_j(p_process->argv[0], ": kill ", p_process->argv[i], " failed: no such process\n");
+            mx_strjoin_arr(p_process->argv[0], ": kill ", p_process->argv[i], " failed: no such process\n");
             p_process->exit_code = 1;
         }
         mx_set_process_status(shell, pid, MX_STAT_TERMINATED);

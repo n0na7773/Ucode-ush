@@ -266,7 +266,7 @@ void mx_exec_signal(int keycode, char **line, int *position, Prompt *shell) {
     }
 }
 
-void buildin_fork(Prompt *shell, int job_id, int (*builtin_functions[]) (Prompt *shell, Process *p_process), Process *p_process) {
+void buildin_fork(Prompt *shell, int job_num, int (*builtin_functions[]) (Prompt *shell, Process *p_process), Process *p_process) {
     pid_t child_pid = fork();
 
     p_process->pid = child_pid;
@@ -276,7 +276,7 @@ void buildin_fork(Prompt *shell, int job_id, int (*builtin_functions[]) (Prompt 
     }
     else if (child_pid == 0) {
         if (isatty(STDIN_FILENO)) {
-            mx_pgid(shell, job_id, child_pid);
+            mx_pgid(shell, job_num, child_pid);
         }
         mx_dup_fd(p_process);
         p_process->exit_code = builtin_functions[p_process->type](shell, p_process);
@@ -284,10 +284,10 @@ void buildin_fork(Prompt *shell, int job_id, int (*builtin_functions[]) (Prompt 
     }
     else {
         if (isatty(STDIN_FILENO)) {
-            if (shell->jobs[job_id]->pgid == 0) {
-                shell->jobs[job_id]->pgid = child_pid;
+            if (shell->jobs[job_num]->pgid == 0) {
+                shell->jobs[job_num]->pgid = child_pid;
             }
-            setpgid (child_pid, shell->jobs[job_id]->pgid);
+            setpgid (child_pid, shell->jobs[job_num]->pgid);
         }
     }
 }
@@ -316,7 +316,7 @@ void buildin_std_ex(Prompt *shell, int (*builtin_functions[]) (Prompt *shell, Pr
     }
 }
 
-int mx_launch_builtin(Prompt *shell, Process *p_process, int job_id) {
+int mx_launch_builtin(Prompt *shell, Process *p_process, int job_num) {
     int (*builtin_functions[])(Prompt *shell, Process *p_process) =
          {&mx_env, &mx_export, &mx_unset, &mx_echo, &mx_jobs, &mx_fg,
           &mx_bg, &mx_cd, &mx_pwd, &mx_which, &mx_exit, &mx_set,
@@ -325,7 +325,7 @@ int mx_launch_builtin(Prompt *shell, Process *p_process, int job_id) {
 
     p_process->status = MX_STATUS_RUNNING;
     if (!p_process->foregrd || p_process->pipe) {
-        buildin_fork(shell, job_id, builtin_functions, p_process);
+        buildin_fork(shell, job_num, builtin_functions, p_process);
     }
     else {
         buildin_std_ex(shell, builtin_functions, p_process);
@@ -334,15 +334,15 @@ int mx_launch_builtin(Prompt *shell, Process *p_process, int job_id) {
     return p_process->exit_code;
 }
 
-void mx_pgid(Prompt *shell, int job_id, int child_pid) {
-    if (shell->jobs[job_id]->pgid == 0) {
-        shell->jobs[job_id]->pgid = child_pid;
+void mx_pgid(Prompt *shell, int job_num, int child_pid) {
+    if (shell->jobs[job_num]->pgid == 0) {
+        shell->jobs[job_num]->pgid = child_pid;
     }
 
-    setpgid(child_pid, shell->jobs[job_id]->pgid);
+    setpgid(child_pid, shell->jobs[job_num]->pgid);
 
-    if (shell->jobs[job_id]->foregrd) {
-        tcsetpgrp(STDIN_FILENO, shell->jobs[job_id]->pgid);
+    if (shell->jobs[job_num]->foregrd) {
+        tcsetpgrp(STDIN_FILENO, shell->jobs[job_num]->pgid);
     }
 
     signal(SIGINT, MX_SIG_DFL);
@@ -613,15 +613,15 @@ char *mx_run_sub_shell(char *substr, Prompt *shell) {
     return result;
 }
 
-int mx_get_proc_count(Prompt *shell, int job_id, int filter) {
+int mx_get_proc_count(Prompt *shell, int job_num, int filter) {
     Process *p_process;
     int count = 0;
 
-    if (job_id > 5000 || shell->jobs[job_id] == NULL) {
+    if (job_num > 5000 || shell->jobs[job_num] == NULL) {
         return -1;
     }
 
-    for (p_process = shell->jobs[job_id]->first_pr; p_process != NULL; p_process = p_process->next) {
+    for (p_process = shell->jobs[job_num]->first_pr; p_process != NULL; p_process = p_process->next) {
         if ((filter == MX_FILTER_DONE && p_process->status == MX_STATUS_DONE)
         || (filter == MX_FILT_IN_PROGR && p_process->status != MX_STATUS_DONE)
         || filter == MX_FILTER_ALL) {
@@ -635,7 +635,7 @@ int mx_get_proc_count(Prompt *shell, int job_id, int filter) {
 void mx_set_process_status(Prompt *shell, int pid, int status) {
     int i;
     Process *p_process;
-    int job_id = mx_job_id_by_pid(shell, pid);
+    int job_num = mx_job_num_by_pid(shell, pid);
 
     for (i = 1; i < shell->max_number_job; i++) {
         if (shell->jobs[i] == NULL) {
@@ -649,7 +649,7 @@ void mx_set_process_status(Prompt *shell, int pid, int status) {
                     if (shell->jobs_stack->last && shell->jobs_stack->prev_last) {
                         shell->jobs_stack->prev_last = shell->jobs_stack->last;
                     }
-                    shell->jobs_stack->last = job_id;
+                    shell->jobs_stack->last = job_num;
                 }
                 break;
             }

@@ -75,35 +75,35 @@ char *error_getter_bin(char **name, char *command, int *status) {
     return error;
 }
 
-static void child_wrk(Prompt *shell, Process *p_process, int job_id, int child_pid) {
+static void child_wrk(Prompt *shell, Process *p_process, int job_num, int child_pid) {
     int shell_is_interactive = isatty(STDIN_FILENO);
 
     if (shell_is_interactive) {
-        mx_pgid(shell, job_id, child_pid);
+        mx_pgid(shell, job_num, child_pid);
     }
 
     mx_dup_fd(p_process);
     char *command = p_process->argv[0];
-    char **arr = mx_strsplit(shell->jobs[job_id]->path, ':');
-    shell->jobs[job_id]->path  = check_path_launch_process(arr, command);
+    char **arr = mx_strsplit(shell->jobs[job_num]->path, ':');
+    shell->jobs[job_num]->path  = check_path_launch_process(arr, command);
     mx_del_strarr(&arr);
-    char *error = error_getter(&shell->jobs[job_id]->path, command, &p_process->status);
+    char *error = error_getter(&shell->jobs[job_num]->path, command, &p_process->status);
 
-    if(execve(shell->jobs[job_id]->path, p_process->argv, shell->jobs[job_id]->env) < 0) {
+    if(execve(shell->jobs[job_num]->path, p_process->argv, shell->jobs[job_num]->env) < 0) {
         mx_print_error(error, command);
         mx_printerr("\n");
         free(error);
-        free(shell->jobs[job_id]->path);
+        free(shell->jobs[job_num]->path);
         _exit(p_process->status);
     }
 
-    free(shell->jobs[job_id]->path);
+    free(shell->jobs[job_num]->path);
     free(error);
 
     exit(p_process->status);
 }
 
-int mx_launch_process(Prompt *shell, Process *p_process, int job_id) {
+int mx_launch_process(Prompt *shell, Process *p_process, int job_num) {
     int shell_is_interactive = isatty(STDIN_FILENO);
     pid_t child_pid;
 
@@ -115,16 +115,16 @@ int mx_launch_process(Prompt *shell, Process *p_process, int job_id) {
         exit(1);
     }
     else if (child_pid == 0) {
-        child_wrk(shell, p_process, job_id, child_pid);
+        child_wrk(shell, p_process, job_num, child_pid);
     }
     else {
         p_process->pid = child_pid;
         if (shell_is_interactive) {
             pid_t pid = child_pid;
-            if (shell->jobs[job_id]->pgid == 0) {
-                shell->jobs[job_id]->pgid = pid;
+            if (shell->jobs[job_num]->pgid == 0) {
+                shell->jobs[job_num]->pgid = pid;
             }
-            setpgid (pid, shell->jobs[job_id]->pgid);
+            setpgid (pid, shell->jobs[job_num]->pgid);
         }
     }
     

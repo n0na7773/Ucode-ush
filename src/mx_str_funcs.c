@@ -114,6 +114,16 @@ char **mx_strdup_arr(char **strarr) {
     return res;
 }
 
+void mx_strjoin_arr(char *arg1, char *arg2, char *arg3, char *arg4) {
+    char *error = NULL;
+    error = mx_strjoin(error, arg1);
+    error = mx_strjoin(error, arg2);
+    error = mx_strjoin(error, arg3);
+    error = mx_strjoin(error, arg4);
+    mx_printerr(error);
+    mx_strdel(&error);
+}
+
 char *mx_strdup_from(char *str, int index) {
     for (int i = 0; i <= index; i++) {
         str++;
