@@ -1,28 +1,6 @@
 #include "ush.h"
 
-int mx_check_args(Prompt *shell, Process *proc) {
-    int job_num;
-
-    if (proc->argv[1][0] == '%' && isdigit(proc->argv[1][1])) {
-        if ((job_num = atoi((proc->argv[1] + 1))) < 1) {
-            mx_strjoin_arr(proc->argv[0], ": ", proc->argv[1],": no such job\n");
-            return -1;
-        }
-    } else if (proc->argv[1][0] == '%' && !isdigit(proc->argv[1][1])) {
-        if ((job_num = mx_find_job(shell, (proc->argv[1] + 1))) < 1) {
-            mx_strjoin_arr(proc->argv[0], ": job not found: ", (proc->argv[1] + 1), "\n");
-            return -1;
-        }
-    } else {
-        if ((job_num = mx_find_job(shell, proc->argv[1])) < 1) {
-            mx_strjoin_arr(proc->argv[0], ": job not found: ", proc->argv[1], "\n");
-            return -1;
-        }
-    }
-    return job_num;
-}
-
-int mx_bg_get_job_num(Prompt *shell, Process *proc) {
+static int mx_bg_get_job_num(Prompt *shell, Process *proc) {
     int job_num;
     int args = 0;
 
@@ -34,7 +12,7 @@ int mx_bg_get_job_num(Prompt *shell, Process *proc) {
         mx_printerr("bg: no current job\n");
         return -1;
     } else {
-        if ((job_num = mx_check_args(shell, proc)) < 1) return -1;
+        if ((job_num = mx_check_job_args(shell, proc)) < 1) return -1;
     }
     return job_num;
 }

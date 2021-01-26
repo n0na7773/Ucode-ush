@@ -33,7 +33,7 @@ static int fg_get_job_num (Prompt *shell, Process *proc) {
             return -1;
         }
     } else {
-        if ((job_num = mx_check_args(shell, proc)) < 1) return -1;
+        if ((job_num = mx_check_job_args(shell, proc)) < 1) return -1;
     }
     return job_num;
 }

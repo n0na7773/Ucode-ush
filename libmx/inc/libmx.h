@@ -55,7 +55,7 @@ char *mx_del_extra_spaces(const char *str);//88 changed
 char **mx_strsplit(const char *s, char c);//25 changed
 char *mx_strjoin(const char *s1, const char *s2);//75 changed
 char *mx_file_to_str(const char *file);//100
-char *mx_replace_substr(const char *str, const char *sub, const char *replace);//100
+char *mx_mx_replace_substr(const char *str, const char *sub, const char *replace);//100
 int mx_read_line(char **lineptr, size_t buf_size, char delim, const int fd);//20 this shit annoys me
 
 //Memory Pack

@@ -23,7 +23,7 @@ void kill_job(Prompt *shell, Process *p_process, int i) {
     int pgid;
     int job_num;
 
-    if ((job_num = mx_check_args(shell, p_process)) < 1) {
+    if ((job_num = mx_check_job_args(shell, p_process)) < 1) {
         p_process->exit_code = 1;
         return;
     }

@@ -292,27 +292,17 @@ typedef struct _prompt {
 }             Prompt;
 
 // mx_do_bg.c
-int mx_check_args(Prompt *, Process *);     // Used in fg and bg
-int mx_bg_get_job_num(Prompt *, Process *);
-void mx_strjoin_arr(char *, char *, char *, char *);
+int mx_bg(Prompt *, Process *);
 
 // mx_do_cd.c
-int cd_count_args(char **, int);
-void cd_fill_options(int, cd_t *, char **);
-void mx_change_dir(char *, cd_t, Prompt *, int *);
-char *chpwd(char **, int, Prompt *);
-char *replace_sub(char *, char *, char *);
-char *mx_go_somewhere(Process *, int);
-char *mx_go_back(void);
-char *mx_go_home(void);
-
-// mx_do_chdir.c
-int mx_chdir(Prompt *, Process *);
+int mx_cd(Prompt *, Process *);
+int mx_chdir(Prompt *, Process *);	
 
 // mx_do_echo.c
-void mx_escape_seq(Process *, int, echo_t);
+int mx_echo(Prompt *, Process *); 
 
 // mx_do_env.c
+int mx_env(Prompt *, Process *);
 int mx_count_env_options(char **, BuiltIn *);
 int mx_add_option(char **, int *, int *, BuiltIn *);
 void mx_set_data(BuiltIn *, char *[]);
@@ -321,6 +311,7 @@ void mx_env_err(int *, int *, char);
 void mx_print_env_error(char , char *);
 
 // mx_do_exit.c
+int mx_exit(Prompt *, Process *); 
 int mx_true(Prompt *, Process *);
 int mx_false(Prompt *, Process *);
 void mx_clear_all(Prompt *);
@@ -328,19 +319,25 @@ void mx_clear_export(Export *);
 void mx_clear_list(t_list **);
 
 // mx_do_export.c
+int mx_export(Prompt *, Process *);	
 void mx_push_export(Export **, void *, void *);
 void mx_export_or_error(char *, Export *, Export *, int *);
 void mx_clear_data(char *, char *);
 
 // mx_do_fg.c
+int mx_fg(Prompt *, Process *);	
 
-// mx_do_kil.c
+// mx_do_kill.c
+int mx_kill(Prompt *, Process *);
 
 // mx_do_pwd.c
+int mx_pwd(Prompt *, Process *);
 
 // mx_do_unset.c
+int mx_unset(Prompt *, Process *);
 
 // mx_do_which.c
+int mx_which(Prompt *, Process *);
 void mx_get_command_info(Prompt *, char *, int *, which_t);
 
 // mx_error.c
@@ -392,6 +389,7 @@ int mx_job_is_running(Prompt *, int);
 int mx_job_num_by_pid(Prompt *, int);
 int mx_get_pgid_by_job_num(Prompt *, int);
 int mx_job_completed(Prompt *, int);
+int mx_check_job_args(Prompt *, Process *);     // Used in fg and bg
 int mx_wait_job(Prompt *, int);	                // Waitpid  in  group
 void mx_launch_job(Prompt *, Job *);
 void mx_remove_job(Prompt *, int);
@@ -469,7 +467,7 @@ char *mx_strdup_from(char *, int);
 char *mx_strjoin_free(char *, char const *);
 char *mx_strtok (char *, const char *);
 char **mx_strdup_arr(char **);
-
+void mx_strjoin_arr(char *, char *, char *, char *);
 // mx_substring.c
 char *mx_subst_tilde(char *, Export *);
 char *mx_add_login(char *, char *);
@@ -477,16 +475,6 @@ char *mx_substr_dollar(char *, Export *);
 char *mx_sub_str_command(char *, Prompt *);
 
 // Builtin commands
-int mx_env(Prompt *, Process *);	// mx_do_env.c
-int mx_echo(Prompt *, Process *);   // mx_do_echo.c
-int mx_fg(Prompt *, Process *);		// mx_do_fg.c
-int mx_bg(Prompt *, Process *);		// mx_do_bg.c
-int mx_cd(Prompt *, Process *);		// mx_do_cd.c
-int mx_pwd(Prompt *, Process *);	// mx_do_pwd.c
-int mx_export(Prompt *, Process *);	// mx_do_export.c
-int mx_unset(Prompt *, Process *);	// mx_do_unset.c
-int mx_which(Prompt *, Process *);	// mx_do_which.c
-int mx_exit(Prompt *, Process *); 	// mx_do_exit.c
-int mx_kill(Prompt *, Process *); 	// mx_do_kill.c
+ 
 
 #endif
