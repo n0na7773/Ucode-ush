@@ -56,7 +56,7 @@ int mx_bg(Prompt *shell, Process *proc) {
         return 1;
     }
 
-    mx_set_job_status(shell, job_num, MX_STATUS_CONTINUED);
+    mx_set_job_status(shell, job_num, _STATUS_CONTINUED);
     mx_print_job_status(shell, job_num, 0);
     return 0;
 }

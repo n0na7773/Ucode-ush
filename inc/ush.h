@@ -24,99 +24,99 @@
 #include <grp.h>
 
 // Jobs
-#define MX_STATUS_RUNNING 0
-#define MX_STATUS_DONE 1
-#define MX_STATUS_SUSPENDED 2
-#define MX_STATUS_CONTINUED 3
-#define MX_STAT_TERMINATED 4
+#define _STATUS_RUNNING 0
+#define _STATUS_DONE 1
+#define _STATUS_SUSPENDED 2
+#define _STATUS_CONTINUED 3
+#define _STAT_TERMINATED 4
 
-#define MX_FILTER_ALL 0
-#define MX_FILTER_DONE 1
-#define MX_FILT_IN_PROGR 2
+#define _FILTER_ALL 0
+#define _FILTER_DONE 1
+#define _FILT_IN_PROGR 2
 
 // Timers
-#define MX_WNOHANG          		0x00000001
-#define MX_WUNTRACED        		0x00000002
-#define MX_W_INT(w)         		(*(int *)&(w))  // Convert union wait to int
-#define MX_WSTAT(x)         		(MX_W_INT(x) & 0177)
-#define MX_WSTOPPED         		0177            // _WSTATUS if process is stopped
-#define MX_WSTOPSIG(x)      		(MX_W_INT(x) >> 8)
-#define MX_WIFCONT(x)       		(MX_WSTAT(x) == MX_WSTOPPED && MX_WSTOPSIG(x) == 0x13)
-#define MX_WIFSTOPP(x)      		(MX_WSTAT(x) == MX_WSTOPPED && MX_WSTOPSIG(x) != 0x13)
-#define MX_WIFEXITED(x)     		(MX_WSTAT(x) == 0)
-#define MX_WIFSIGNALED(x)   		(MX_WSTAT(x) != MX_WSTOPPED && MX_WSTAT(x) != 0)
-#define MX_WTERMSIG(x)      		(MX_WSTAT(x))
-#define MX_W_EXITCODE(ret, sig)		((ret) << 8 | (sig))
-#define MX_W_STOPCODE(sig)  		((sig) << 8 | MX_WSTOPPED)
-#define MX_WEXITED          		0x00000004  // [XSI] Processes which have exitted
-#define MX_WCONTINUED       		0x00000010  // [XSI] Any child stopped then continu
-#define MX_WNOWAIT          		0x00000020  // [XSI] Leave process returned waitabl
-#define MX_SIG_DFL          		(void (*)(int))0
-#define MX_SIG_IGN          		(void (*)(int))1
-#define MX_SIG_HOLD         		(void (*)(int))5
-#define MX_SIG_ERR          		((void (*)(int))-1)
+#define _WNOHANG          		0x00000001
+#define _WUNTRACED        		0x00000002
+#define _W_INT(w)         		(*(int *)&(w))      // Convert union wait to int
+#define _WSTAT(x)         		(_W_INT(x) & 0177)
+#define _WSTOPPED         		0177                // _WSTATUS if process is stopped
+#define _WSTOPSIG(x)      		(_W_INT(x) >> 8)
+#define _WIFCONT(x)       		(_WSTAT(x) == _WSTOPPED && _WSTOPSIG(x) == 0x13)
+#define _WIFSTOPP(x)      		(_WSTAT(x) == _WSTOPPED && _WSTOPSIG(x) != 0x13)
+#define _WIFEXITED(x)     		(_WSTAT(x) == 0)
+#define _WIFSIGNALED(x)   		(_WSTAT(x) != _WSTOPPED && _WSTAT(x) != 0)
+#define _WTERMSIG(x)      		(_WSTAT(x))
+#define _W_EXITCODE(ret, sig)		((ret) << 8 | (sig))
+#define _W_STOPCODE(sig)  		((sig) << 8 | _WSTOPPED)
+#define _WEXITED          		0x00000004          // [XSI] Processes which have exitted
+#define _WCONTINUED       		0x00000010          // [XSI] Any child stopped then continu
+#define _WNOWAIT          		0x00000020          // [XSI] Leave process returned waitabl
+#define _SIG_DFL          		(void (*)(int))0
+#define _SIG_IGN          		(void (*)(int))1
+#define _SIG_HOLD         		(void (*)(int))5
+#define _SIG_ERR          		((void (*)(int))-1)
 
 // Colors
-#define MX_BLK          "\x1B[30m"
-#define MX_RED          "\x1B[31m"
-#define MX_GRN          "\x1B[32m"
-#define MX_YEL          "\x1B[33m"
-#define MX_BLU          "\x1B[34m"
-#define MX_MAG          "\x1B[35m"
-#define MX_CYN          "\x1B[36m"
-#define MX_WHT          "\x1B[37m"
-#define MX_RESET        "\x1B[0m"
-#define MX_RED_B        "\x1B[1;31m"
-#define MX_RESET_B      "\x1B[1;31m"
-#define MX_BLK_F_RED_B  "\x1B[0;30;41m"
-#define MX_BLK_F_CYAN_B "\x1B[0;30;46m"
-#define MX_BLOCK        "\x1B[0;34;46m"
-#define MX_CHR          "\x1B[0;34;43m"
-#define MX_DIR_T        "\x1B[0;30;42m"
-#define MX_DIR_X        "\033[0;30;43m"
-#define MX_BOLD_MAGENTA "\x1B[1;35m"
-#define MX_BOLD_CYAN    "\x1B[1;36m"
-#define MX_BOLD_RED     "\x1B[[1;31m"
-#define MX_BOLD_BLUE    "\x1B[1;34m"
+#define _BLK          "\x1B[30m"
+#define _RED          "\x1B[31m"
+#define _GRN          "\x1B[32m"
+#define _YEL          "\x1B[33m"
+#define _BLU          "\x1B[34m"
+#define _MAG          "\x1B[35m"
+#define _CYN          "\x1B[36m"
+#define _WHT          "\x1B[37m"
+#define _RESET        "\x1B[0m"
+#define _RED_B        "\x1B[1;31m"
+#define _RESET_B      "\x1B[1;31m"
+#define _BLK_F_RED_B  "\x1B[0;30;41m"
+#define _BLK_F_CYAN_B "\x1B[0;30;46m"
+#define _BLOCK        "\x1B[0;34;46m"
+#define _CHR          "\x1B[0;34;43m"
+#define _DIR_T        "\x1B[0;30;42m"
+#define _DIR_X        "\033[0;30;43m"
+#define _BOLD_MAGENTA "\x1B[1;35m"
+#define _BOLD_CYAN    "\x1B[1;36m"
+#define _BOLD_RED     "\x1B[[1;31m"
+#define _BOLD_BLUE    "\x1B[1;34m"
 
 // Keyboard keys
-#define MX_INPUT_SIZE  1024
-#define MX_K_LEFT      4479771  // Edit keys
-#define MX_K_RIGHT     4414235
-#define MX_K_HOME      4741915
-#define MX_K_END       4610843
-#define MX_K_UP        4283163  // History keys
-#define MX_K_DOWN      4348699
-#define MX_P_UP        2117425947
-#define MX_P_DOWN      2117491483
-#define MX_C_PROMPT    42946
-#define MX_CTRL_D      4
-#define MX_CTRL_C      3
-#define MX_CTRL_R      18
-#define MX_BACKSCAPE   127
-#define MX_TAB         9
-#define MX_ENTER       10
+#define _INPUT_SIZE  1024
+#define _K_LEFT      4479771  // Edit keys
+#define _K_RIGHT     4414235
+#define _K_HOME      4741915
+#define _K_END       4610843
+#define _K_UP        4283163  // History keys
+#define _K_DOWN      4348699
+#define _P_UP        2117425947
+#define _P_DOWN      2117491483
+#define _C_PROMPT    42946
+#define _CTRL_D      4
+#define _CTRL_C      3
+#define _CTRL_R      18
+#define _BACKSCAPE   127
+#define _TAB         9
+#define _ENTER       10
 
 // Abstract syntax
-#define MX_PARSE_DELIM      ";|&><"
-#define MX_QUOTE            "\"\'`$("
-#define MX_DBLQ_EXCEPTIONS  "$`\"\\!"
-#define MX_USH_TOK_DELIM    " \t\r\n\a"
+#define _PARSE_DELIM      ";|&><"
+#define _QUOTE            "\"\'`$("
+#define _DBLQ_EXCEPTIONS  "$`\"\\!"
+#define _USH_TOK_DELIM    " \t\r\n\a"
 
 // Macroses for recognizing delimeters.
-#define MX_IS_SEP(x)            (!mx_strcmp(x, ";"))
-#define MX_IS_FON(x)            (!mx_strcmp(x, "&"))
-#define MX_IS_AND(x)            (!mx_strcmp(x, "&&"))
-#define MX_IS_OR(x)             (!mx_strcmp(x, "||"))
-#define MX_IS_PIPE(x)           (!mx_strcmp(x, "|"))
-#define MX_IS_R_INPUT(x)        (!mx_strcmp(x, "<"))
-#define MX_IS_R_INPUT_DBL(x)    (!mx_strcmp(x, "<<"))
-#define MX_IS_R_OUTPUT(x)       (!mx_strcmp(x, ">"))
-#define MX_IS_R_OUTPUT_DBL(x)   (!mx_strcmp(x, ">>"))
-#define MX_IS_SEP_FIRST_LWL(x)  (x == SEP || x == FON || x == AND || x == OR)
-#define MX_IS_REDIR_INP(x)      (x == R_INPUT || x == R_INPUT_DBL)
-#define MX_IS_REDIR_OUTP(x)     (x == R_OUTPUT || x == R_OUTPUT_DBL)
-#define MX_IS_REDIRECTION(x)    (MX_IS_REDIR_INP(x) || MX_IS_REDIR_OUTP(x))
+#define _IS_SEP(x)            (!mx_strcmp(x, ";"))
+#define _IS_FON(x)            (!mx_strcmp(x, "&"))
+#define _IS_AND(x)            (!mx_strcmp(x, "&&"))
+#define _IS_OR(x)             (!mx_strcmp(x, "||"))
+#define _IS_PIPE(x)           (!mx_strcmp(x, "|"))
+#define _IS_R_INPUT(x)        (!mx_strcmp(x, "<"))
+#define _IS_R_INPUT_DBL(x)    (!mx_strcmp(x, "<<"))
+#define _IS_R_OUTPUT(x)       (!mx_strcmp(x, ">"))
+#define _IS_R_OUTPUT_DBL(x)   (!mx_strcmp(x, ">>"))
+#define _IS_SEP_FIRST_LWL(x)  (x == SEP || x == FON || x == AND || x == OR)
+#define _IS_REDIR_INP(x)      (x == R_INPUT || x == R_INPUT_DBL)
+#define _IS_REDIR_OUTP(x)     (x == R_OUTPUT || x == R_OUTPUT_DBL)
+#define _IS_REDIRECTION(x)    (_IS_REDIR_INP(x) || _IS_REDIR_OUTP(x))
 
 // Operators
 enum _type {
@@ -138,7 +138,7 @@ typedef struct _abst {
     char    *token;
     int     type;
     struct  _abst *next;
-    struct  _abst *left;
+    struct  _abst *prev;
 }              Abstract;
 
 // Redirections
@@ -239,7 +239,7 @@ typedef struct _process {
 
 // Pipeline of processes
 typedef struct _job {
-    int     job_num;            // Number in jobs control
+    int     job_num;           // Number in jobs control
     int     job_type;          // 0 if normal, or enum &&, || of previos job
     char    *command;          // Command line, used for messages
     Process *first_pr;         // List of processes in this job
@@ -261,14 +261,14 @@ typedef struct _job {
 
 typedef struct _prompt {
     int     argc;
-    char    **argv;               // Check usage, because the same in process
-    char    **envp;               // Not used
-    int     exit_code;            // Return if exit
-    Job   *jobs[5000];  // Arr jobs
+    char    **argv;                 // Check usage, because the same in process
+    char    **envp;                 // Not used
+    int     exit_code;              // Return if exit
+    Job   *jobs[5000];              // Arr jobs
     Stack *jobs_stack;
-    int     max_number_job;    // Number of added jobs + 1
-    char    **builtin_list;    // Builtin functions
-    int     exit_flag;         // Defaults 0, check if you have suspended jobs
+    int     max_number_job;         // Number of added jobs + 1
+    char    **builtin_list;         // Builtin functions
+    int     exit_flag;              // Defaults 0, check if you have suspended jobs
     char    **history;
     int     history_count;
     int     history_index;
@@ -292,17 +292,17 @@ typedef struct _prompt {
 }             Prompt;
 
 // mx_do_bg.c
-int mx_check_args(Prompt *, Process *);  // Used in fg and bg
+int mx_check_args(Prompt *, Process *);     // Used in fg and bg
 int mx_bg_get_job_num(Prompt *, Process *);
 void mx_strjoin_arr(char *, char *, char *, char *);
 
 // mx_do_cd.c
-int cd_count_args(char **, int );
-void cd_fill_options(int , cd_t *, char **);
-void mx_change_dir(char *, cd_t , Prompt *, int *);
-char *chpwd(char **, int , Prompt *);
+int cd_count_args(char **, int);
+void cd_fill_options(int, cd_t *, char **);
+void mx_change_dir(char *, cd_t, Prompt *, int *);
+char *chpwd(char **, int, Prompt *);
 char *replace_sub(char *, char *, char *);
-char *mx_go_somewhere(Process *, int );
+char *mx_go_somewhere(Process *, int);
 char *mx_go_back(void);
 char *mx_go_home(void);
 
@@ -310,14 +310,14 @@ char *mx_go_home(void);
 int mx_chdir(Prompt *, Process *);
 
 // mx_do_echo.c
-void mx_escape_seq(Process *, int , echo_t );
+void mx_escape_seq(Process *, int, echo_t);
 
 // mx_do_env.c
 int mx_count_env_options(char **, BuiltIn *);
 int mx_add_option(char **, int *, int *, BuiltIn *);
 void mx_set_data(BuiltIn *, char *[]);
 void mx_launch_command( Process *, BuiltIn *, int *);
-void mx_env_err(int *, int *, char );
+void mx_env_err(int *, int *, char);
 void mx_print_env_error(char , char *);
 
 // mx_do_exit.c
@@ -341,7 +341,7 @@ void mx_clear_data(char *, char *);
 // mx_do_unset.c
 
 // mx_do_which.c
-void mx_get_command_info(Prompt *, char *, int *, which_t );
+void mx_get_command_info(Prompt *, char *, int *, which_t);
 
 // mx_error.c
 void mx_sig_h(int signal);
@@ -360,20 +360,20 @@ char *mx_get_line(Prompt *);
 bool mx_get_functions(char *, Prompt *);
 
 // mx_init_prompt.c
-Prompt *init_ush(int , char **);
+Prompt *init_ush(int, char **);
 int mx_builtin_commands_idex(Prompt *, char *);
-int mx_get_proc_count(Prompt *, int , int );
-int mx_launch_builtin(Prompt *, Process *, int );
+int mx_get_proc_count(Prompt *, int, int);
+int mx_launch_builtin(Prompt *, Process *, int);
 int mx_get_flag(char **);
 void mx_set_shell_grp(Prompt *);
 void mx_termios_save(Prompt *);
 void mx_termios_restore(Prompt *);
-void mx_pgid(Prompt *, int , int );
-void mx_set_process_status(Prompt *, int , int );
+void mx_pgid(Prompt *, int, int);
+void mx_set_process_status(Prompt *, int, int);
 void mx_print_prompt(Prompt *);
 void mx_edit_prompt(Prompt *);
-void mx_edit_command(int , int *, char **, Prompt *);
-void mx_exec_signal(int , char **, int *, Prompt *);
+void mx_edit_command(int, int *, char **, Prompt *);
+void mx_exec_signal(int, char **, int *, Prompt *);
 void mx_check_exit(Prompt *, Process *);
 char *mx_get_shlvl(void);
 char *mx_run_sub_shell(char *, Prompt *);
@@ -385,26 +385,26 @@ Job *mx_create_job(Prompt *, Abstract *);
 int mx_jobs(Prompt *, Process *);
 int mx_get_next_job_num(Prompt *);
 int mx_insert_job(Prompt *, Job *);
-int mx_set_job_status(Prompt *, int , int );
-int mx_get_job_status(Prompt *, int , int );
+int mx_set_job_status(Prompt *, int, int);
+int mx_get_job_status(Prompt *, int, int);
 int mx_find_job(Prompt *, char *);
-int mx_job_is_running(Prompt *, int );
-int mx_job_num_by_pid(Prompt *, int );
-int mx_get_pgid_by_job_num(Prompt *, int );
-int mx_job_completed(Prompt *, int );
-int mx_wait_job(Prompt *, int );	// Waitpid  in  group
+int mx_job_is_running(Prompt *, int);
+int mx_job_num_by_pid(Prompt *, int);
+int mx_get_pgid_by_job_num(Prompt *, int);
+int mx_job_completed(Prompt *, int);
+int mx_wait_job(Prompt *, int);	                // Waitpid  in  group
 void mx_launch_job(Prompt *, Job *);
-void mx_remove_job(Prompt *, int );
-void mx_remove_job_from_panel(Prompt *, int );
+void mx_remove_job(Prompt *, int);
+void mx_remove_job_from_panel(Prompt *, int);
 void mx_set_last_job(Prompt *);
 void mx_init_jobs_stack(Prompt *);
-void mx_push_to_stack (Prompt *, int );
-void mx_pop_from_stack(Prompt * , int );
+void mx_push_to_stack (Prompt *, int);
+void mx_pop_from_stack(Prompt * , int);
 void mx_print_stack (Prompt *);
-void mx_print_pid_process_in_job(Prompt *, int );	// If foreg execution
-void mx_print_job_status(Prompt *, int , int );
-void mx_check_jobs(Prompt *);            // Waitpid any 
-void mx_destroy_jobs(Prompt *, int );    // Free  memory
+void mx_print_pid_process_in_job(Prompt *, int);	// If foreg execution
+void mx_print_job_status(Prompt *, int, int);
+void mx_check_jobs(Prompt *);                       // Waitpid any 
+void mx_destroy_jobs(Prompt *, int);               // Free  memory
 
 // mx_loop.c
 void mx_ush_loop(Prompt *);
@@ -465,7 +465,7 @@ int mx_get_char_index_quote(char *, char *, char *);
 int mx_strlen_arr(char **);
 void mx_strtrim_quote(char **);
 void mx_print_args_in_line(char **, const char *);
-char *mx_strdup_from(char *, int index);
+char *mx_strdup_from(char *, int);
 char *mx_strjoin_free(char *, char const *);
 char *mx_strtok (char *, const char *);
 char **mx_strdup_arr(char **);

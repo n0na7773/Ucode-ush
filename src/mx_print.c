@@ -3,7 +3,7 @@
 void mx_print_color(char *macros, char *str) {
     mx_printstr(macros);
     mx_printstr(str);
-    mx_printstr(MX_RESET);
+    mx_printstr(_RESET);
 }
 
 void mx_print_strarr_in_line(char **result, const char *delim) {
@@ -136,7 +136,7 @@ int mx_count_options(char **args, char *options, char *command, char *error) {
 }
 
 static void print_left(Abstract *q) {
-    for (Abstract *tmp_left = q->left; tmp_left; tmp_left = tmp_left->next) {
+    for (Abstract *tmp_left = q->prev; tmp_left; tmp_left = tmp_left->next) {
         mx_printstr("redir == ");
 
         if (tmp_left->type == R_INPUT) mx_printstr("< ");
@@ -162,7 +162,7 @@ static void print_list(Abstract *parsed_line) {
             mx_printstr(q->token);
             mx_printstr("\n");
         }
-        if (q->left)
+        if (q->prev)
             print_left(q);
         mx_printstr("delim == ");
         mx_printint(q->type);
@@ -173,12 +173,12 @@ static void print_list(Abstract *parsed_line) {
 void mx_ast_print(Abstract **ast) {
     char *tmp = NULL;
     for (int i = 0; ast[i]; i++) {
-        mx_print_color(MX_YEL, "job-");
+        mx_print_color(_YEL, "job-");
         tmp = mx_itoa(i + 1);
-        mx_print_color(MX_YEL, tmp);
+        mx_print_color(_YEL, tmp);
         mx_strdel(&tmp);
         mx_printstr("\n");
         print_list(ast[i]);
     }
-    mx_print_color(MX_YEL, "-----\n");
+    mx_print_color(_YEL, "-----\n");
 }

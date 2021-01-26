@@ -39,7 +39,7 @@ void kill_job(Prompt *shell, Process *p_process, int i) {
         p_process->exit_code = 1;
     }
 
-    mx_set_job_status(shell, job_num, MX_STAT_TERMINATED);
+    mx_set_job_status(shell, job_num, _STAT_TERMINATED);
 }
 
 void kill_pid(Prompt *shell, Process *p_process, int i) {
@@ -56,7 +56,7 @@ void kill_pid(Prompt *shell, Process *p_process, int i) {
             mx_strjoin_arr(p_process->argv[0], ": kill ", p_process->argv[i], " failed: no such process\n");
             p_process->exit_code = 1;
         }
-        mx_set_process_status(shell, pid, MX_STAT_TERMINATED);
+        mx_set_process_status(shell, pid, _STAT_TERMINATED);
     }
 }
 

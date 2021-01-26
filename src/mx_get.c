@@ -21,7 +21,7 @@ char *get_func_var(char *line, int indx) {
     char *variable = mx_strtrim(tmp_line);
 
     mx_strdel(&tmp_line);
-    if (mx_get_char_index_quote(variable, MX_USH_TOK_DELIM, NULL) >= 0) {
+    if (mx_get_char_index_quote(variable, _USH_TOK_DELIM, NULL) >= 0) {
         mx_strdel(&variable);
         return mx_syntax_error("(");
     }
@@ -143,13 +143,13 @@ char *mx_get_keys(Prompt *shell) {
     int max_len = 0;
     int pos = 0;
 
-    while(keycode != MX_CTRL_C && keycode != MX_ENTER) {
+    while(keycode != _CTRL_C && keycode != _ENTER) {
         mx_edit_prompt(shell);
         key_read_input(&max_len, &keycode, line);
         max_len += mx_strlen(shell->prompt);
         if(shell->git) max_len += mx_strlen(shell->git) + 7;
         key_choose (&pos, &line, keycode, shell);
-        if(keycode != MX_CTRL_C) key_print_command(shell, line, pos, max_len);
+        if(keycode != _CTRL_C) key_print_command(shell, line, pos, max_len);
     }
     return line;
 }

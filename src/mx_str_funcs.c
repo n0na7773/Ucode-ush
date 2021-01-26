@@ -15,10 +15,10 @@ char *get_end_usual_quote_func(char *s, const char *delim, char *end) {
             s += mx_get_char_index_quote(s + 1, "`", "\"\'$(") + 2;
         }
         else if (mx_strncmp(s, "$(", 2) == 0) {
-            s += mx_get_char_index_quote(s + 2, ")", MX_QUOTE) + 3;
+            s += mx_get_char_index_quote(s + 2, ")", _QUOTE) + 3;
         }
         else if (mx_strncmp(s, "() {", 4) == 0) {
-            s += mx_get_char_index_quote(s + 4, "}", MX_QUOTE) + 5;
+            s += mx_get_char_index_quote(s + 4, "}", _QUOTE) + 5;
         }
         else {
             s++;
@@ -193,7 +193,7 @@ void mx_strtrim_quote_auditor(char *str, char *temp, int *ii_arr, int *jj_arr) {
     if (str[i] == '\"') {
         i++;
         for (; str[i] && str[i] != '\"'; i++, j++) {
-            if (str[i] == '\\' && mx_isdelim(str[i + 1], MX_DBLQ_EXCEPTIONS)) {
+            if (str[i] == '\\' && mx_isdelim(str[i + 1], _DBLQ_EXCEPTIONS)) {
                 i++;
             }
             temp[j] = str[i];

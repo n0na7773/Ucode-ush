@@ -165,7 +165,7 @@ int mx_set_job_status(Prompt *shell, int job_num, int status) {
     }
 
     for (p_process = shell->jobs[job_num]->first_pr; p_process != NULL; p_process = p_process->next) {
-        if (p_process->status != MX_STATUS_DONE) {
+        if (p_process->status != _STATUS_DONE) {
             p_process->status = status;
         }
     }
@@ -180,7 +180,7 @@ int mx_job_completed(Prompt *shell, int job_num) {
     }
 
     for (p_process = shell->jobs[job_num]->first_pr; p_process != NULL; p_process = p_process->next) {
-        if (p_process->status != MX_STATUS_DONE && p_process->status != MX_STAT_TERMINATED) {
+        if (p_process->status != _STATUS_DONE && p_process->status != _STAT_TERMINATED) {
             return 0;
         }
     }
@@ -196,7 +196,7 @@ int mx_job_is_running(Prompt *shell, int job_num) {
     }
 
     for (p_process = shell->jobs[job_num]->first_pr; p_process != NULL; p_process = p_process->next) {
-        if (p_process->status == MX_STATUS_RUNNING) {
+        if (p_process->status == _STATUS_RUNNING) {
             status = 1;
         }
     }
@@ -235,15 +235,15 @@ void mx_check_jobs(Prompt *shell) {
     pid_t pid;
     int status;
 
-    while ((pid = waitpid(-1, &status, MX_WNOHANG | MX_WUNTRACED | MX_WCONTINUED)) > 0) {
-        if (MX_WIFEXITED(status)) {
-            mx_set_process_status(shell, pid, MX_STATUS_DONE);
+    while ((pid = waitpid(-1, &status, _WNOHANG | _WUNTRACED | _WCONTINUED)) > 0) {
+        if (_WIFEXITED(status)) {
+            mx_set_process_status(shell, pid, _STATUS_DONE);
         }
-        else if (MX_WIFSTOPP(status)) {
-            mx_set_process_status(shell, pid, MX_STATUS_SUSPENDED);
+        else if (_WIFSTOPP(status)) {
+            mx_set_process_status(shell, pid, _STATUS_SUSPENDED);
         }
-        else if (MX_WIFCONT(status)) {
-            mx_set_process_status(shell, pid, MX_STATUS_CONTINUED);
+        else if (_WIFCONT(status)) {
+            mx_set_process_status(shell, pid, _STATUS_CONTINUED);
         }
 
         job_num = mx_job_num_by_pid(shell, pid);
@@ -259,22 +259,22 @@ int mx_wait_job(Prompt *shell, int job_num) {
     int wait_count = 0;
     int wait_pid = -1;
     int status = 0;
-    int proc_count = mx_get_proc_count(shell, job_num, MX_FILT_IN_PROGR);
+    int proc_count = mx_get_proc_count(shell, job_num, _FILT_IN_PROGR);
     
     while (wait_count < proc_count) {
         wait_count++;
-        wait_pid = waitpid(-shell->jobs[job_num]->pgid, &status, MX_WUNTRACED);
-        if (MX_WIFEXITED(status)) {
-            mx_set_process_status(shell, wait_pid, MX_STATUS_DONE);
+        wait_pid = waitpid(-shell->jobs[job_num]->pgid, &status, _WUNTRACED);
+        if (_WIFEXITED(status)) {
+            mx_set_process_status(shell, wait_pid, _STATUS_DONE);
         }
-        else if (MX_WSTOPSIG(status)) {
-            mx_set_process_status(shell, wait_pid, MX_STATUS_SUSPENDED);
+        else if (_WSTOPSIG(status)) {
+            mx_set_process_status(shell, wait_pid, _STATUS_SUSPENDED);
             if (wait_count == proc_count) {
                 mx_print_job_status(shell, job_num, 0);
             }
         }
-        else if (MX_WIFSIGNALED(status)) {
-            mx_set_process_status(shell, wait_pid, MX_STAT_TERMINATED);
+        else if (_WIFSIGNALED(status)) {
+            mx_set_process_status(shell, wait_pid, _STAT_TERMINATED);
         }
     }
     return status >> 8;
@@ -546,7 +546,7 @@ void launch_help (Prompt *shell, Job *job, int job_num, int status) {
             mx_remove_job(shell, job_num);
         }
 
-        signal(SIGTTOU, MX_SIG_IGN);
+        signal(SIGTTOU, _SIG_IGN);
         tcsetpgrp(STDIN_FILENO, getpid());
         tcgetattr(shell_terminal, &job->tmodes);
         tcsetattr(shell_terminal, TCSADRAIN, &shell->tmodes);
@@ -580,7 +580,7 @@ int execute_job (Prompt *shell, Job * job, int job_num) {
         }
 
         if ((mx_set_redirections(shell, job, p_process)) != 0) {
-            p_process->status = MX_STATUS_DONE;
+            p_process->status = _STATUS_DONE;
             p_process->exit_code = 1;
             continue;
         }

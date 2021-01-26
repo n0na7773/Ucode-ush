@@ -4,7 +4,7 @@ static int count_sep_first_lwl(Abstract *q_ast) {
     int i = 1;
 
     for (; q_ast; q_ast = q_ast->next)
-        if (MX_IS_SEP_FIRST_LWL(q_ast->type))
+        if (_IS_SEP_FIRST_LWL(q_ast->type))
             i++;
     return i;
 }
@@ -17,7 +17,7 @@ void mx_ast_clear_list(Abstract **list) {
     while (tmtmp_exp) {
         if (tmtmp_exp->token) free(tmtmp_exp->token);
         if (tmtmp_exp->args) mx_del_strarr(&tmtmp_exp->args);
-        if (tmtmp_exp->left) mx_ast_clear_list(&tmtmp_exp->left);
+        if (tmtmp_exp->prev) mx_ast_clear_list(&tmtmp_exp->prev);
 
         tmp = tmtmp_exp->next;
         free(tmtmp_exp);
@@ -39,7 +39,7 @@ Abstract *push_redirections(Abstract **q_ast_arr, Abstract **ast) {
     Abstract *c = (*q_ast_arr)->next;
 
     temp_type = (*q_ast_arr)->type;
-    for (; c && MX_IS_REDIRECTION(temp_type); c = c->next, (*q_ast_arr) = (*q_ast_arr)->next) {
+    for (; c && _IS_REDIRECTION(temp_type); c = c->next, (*q_ast_arr) = (*q_ast_arr)->next) {
         mx_ast_push_back_redirection(ast, c->token, temp_type);
         temp_type = c->type;
     }
@@ -59,10 +59,10 @@ Abstract **mx_ast_parse(Abstract *parsed_line) {
     ast[i] = NULL;
     for (; q; q = q->next) {
         mx_ast_push_back(&ast[i], q->token, q->type);
-        if (MX_IS_REDIRECTION(q->type)) {
+        if (_IS_REDIRECTION(q->type)) {
             q = push_redirections(&q, &ast[i]);
         }
-        if (MX_IS_SEP_FIRST_LWL(q->type) || q->type == NUL) {
+        if (_IS_SEP_FIRST_LWL(q->type) || q->type == NUL) {
             ast[++i] = NULL;
         }
     }
@@ -86,7 +86,7 @@ Abstract *ast_create_node(char *arg, int type) {
     ast_q->token = strdup(arg);
     ast_q->type = type;
     ast_q->next = NULL;
-    ast_q->left = NULL;
+    ast_q->prev = NULL;
 
     return ast_q;
 }
@@ -132,7 +132,7 @@ void mx_ast_push_back_redirection(Abstract **ast_head, char *arg, int type) {
         while (ast_p->next != NULL) {
             ast_p = ast_p->next;
         }
-        mx_ast_push_back(&ast_p->left, arg, type);
+        mx_ast_push_back(&ast_p->prev, arg, type);
     }
 }
 
@@ -151,10 +151,10 @@ Redirection *redir_create_node(char *path, int type) {
     redir_q->input_path = NULL;
     redir_q->output_path = NULL;
 
-    if (MX_IS_REDIR_INP(type)) {
+    if (_IS_REDIR_INP(type)) {
         redir_q->input_path = mx_strdup(path);
     }
-    else if (MX_IS_REDIR_OUTP(type)) {
+    else if (_IS_REDIR_OUTP(type)) {
         redir_q->output_path = mx_strdup(path);
     }
     else {

@@ -107,11 +107,11 @@ void mx_set_shell_grp(Prompt *shell) {
         while (tcgetpgrp(shell_terminal) != (shell_pgid = getpgrp())) {
             kill(-shell_pgid, SIGTTIN);
         }
-        signal(SIGTTOU, MX_SIG_IGN);
-        signal(SIGQUIT, MX_SIG_IGN);
-        signal(SIGTSTP, MX_SIG_IGN);
-        signal(SIGINT, MX_SIG_IGN);
-        signal(SIGTTIN, MX_SIG_IGN);
+        signal(SIGTTOU, _SIG_IGN);
+        signal(SIGQUIT, _SIG_IGN);
+        signal(SIGTSTP, _SIG_IGN);
+        signal(SIGINT, _SIG_IGN);
+        signal(SIGTTIN, _SIG_IGN);
 
         shell_grp_help(shell, shell_pgid);
         char *c_shell_pgid = mx_itoa(shell->shell_pgid);
@@ -153,23 +153,23 @@ static void k_down(Prompt *shell, char **line, int *position) {
 }
 
 void mx_edit_command(int keycode, int *position, char **line, Prompt *shell) {
-    if (keycode == MX_K_LEFT){
+    if (keycode == _K_LEFT){
         if(*position > 0) (*position)--;
-    } else if (keycode == MX_K_RIGHT) {
+    } else if (keycode == _K_RIGHT) {
         if(*position < mx_strlen(*line)) (*position)++;
-    } else if (keycode == MX_K_END) {
+    } else if (keycode == _K_END) {
         *position = mx_strlen(*line);
-    } else if (keycode == MX_K_HOME) {
+    } else if (keycode == _K_HOME) {
         *position = 0;
-    } else if (keycode == MX_K_DOWN || keycode == MX_P_DOWN) {
+    } else if (keycode == _K_DOWN || keycode == _P_DOWN) {
         k_down(shell, line, position);
-    } else if (keycode == MX_K_UP || keycode == MX_P_UP) {
+    } else if (keycode == _K_UP || keycode == _P_UP) {
         k_up(shell, line, position);
-    } else if (keycode == MX_C_PROMPT) {
+    } else if (keycode == _C_PROMPT) {
         if(shell->prompt_status)  shell->prompt_status--;
         else shell->prompt_status++;
         mx_edit_prompt(shell);
-    } else if (keycode == MX_BACKSCAPE){
+    } else if (keycode == _BACKSCAPE){
         k_backscape(position, *line);
     }
 }
@@ -222,15 +222,15 @@ static void exit_ush(Prompt *shell) {
 }
 
 void mx_exec_signal(int keycode, char **line, int *position, Prompt *shell) {
-    if (keycode == MX_CTRL_C)
+    if (keycode == _CTRL_C)
         for (int i = 0; i < mx_strlen(*line); i++) *line[i] = '\0';
 
-    if (keycode == MX_CTRL_D){
+    if (keycode == _CTRL_D){
         if (strcmp(*line, "") == 0) 
             exit_ush(shell);
         else
             for (int i = *position; i < mx_strlen(*line); i++) line[i] = line[i + 1];
-    } else if (keycode == MX_TAB) {
+    } else if (keycode == _TAB) {
         if (mx_strlen(*line) == 0) return;
 
         static DIR *dir = NULL;
@@ -306,7 +306,7 @@ void buildin_std_ex(Prompt *shell, int (*builtin_functions[]) (Prompt *shell, Pr
     }
 
     p_process->exit_code = builtin_functions[p_process->type](shell, p_process);
-    p_process->status = MX_STATUS_DONE;
+    p_process->status = _STATUS_DONE;
 
     if (p_process->output_path) {
         if (p_process->outfile != STDOUT_FILENO) {
@@ -323,7 +323,7 @@ int mx_launch_builtin(Prompt *shell, Process *p_process, int job_num) {
           &mx_kill, &mx_chdir, &mx_false, &mx_alias, &mx_declare, 
           &mx_true, NULL};
 
-    p_process->status = MX_STATUS_RUNNING;
+    p_process->status = _STATUS_RUNNING;
     if (!p_process->foregrd || p_process->pipe) {
         buildin_fork(shell, job_num, builtin_functions, p_process);
     }
@@ -345,11 +345,11 @@ void mx_pgid(Prompt *shell, int job_num, int child_pid) {
         tcsetpgrp(STDIN_FILENO, shell->jobs[job_num]->pgid);
     }
 
-    signal(SIGINT, MX_SIG_DFL);
-    signal(SIGQUIT, MX_SIG_DFL);
-    signal(SIGTSTP, MX_SIG_DFL);
-    signal(SIGTTIN, MX_SIG_DFL);
-    signal(SIGTTOU, MX_SIG_DFL);
+    signal(SIGINT, _SIG_DFL);
+    signal(SIGQUIT, _SIG_DFL);
+    signal(SIGTSTP, _SIG_DFL);
+    signal(SIGTTIN, _SIG_DFL);
+    signal(SIGTTOU, _SIG_DFL);
     signal(SIGPIPE, mx_sig_h);
 }
 
@@ -394,17 +394,17 @@ void mx_print_prompt(Prompt *shell) {
     printf("%s", "\x1B[37m");
 
     if (!shell->prompt_status) {
-        printf("%s", MX_BOLD_MAGENTA);
+        printf("%s", _BOLD_MAGENTA);
     }
 
     printf ("%s", shell->prompt);
 
     if (!shell->prompt_status && shell->git) {
-        printf(" %sgit:(%s%s%s)", MX_BOLD_BLUE, MX_RED, shell->git, MX_BOLD_BLUE);
+        printf(" %sgit:(%s%s%s)", _BOLD_BLUE, _RED, shell->git, _BOLD_BLUE);
     }
 
     printf ("> ");
-    printf("%s", MX_RESET);
+    printf("%s", _RESET);
     fflush (NULL);
 }
 
@@ -468,7 +468,7 @@ static char **func_alias_tokens(char *line, Prompt *shell) {
     }
 
     if (!mx_strncmp(line, "alias", 5) && line[5] && line[5] == ' '
-        && line[6] && !mx_isdelim(line[6], MX_USH_TOK_DELIM)) {
+        && line[6] && !mx_isdelim(line[6], _USH_TOK_DELIM)) {
         mx_get_aliases(line, shell);
         return NULL;
     }
@@ -515,7 +515,7 @@ char *mx_subs_output(char **result) {
     size_t len_token;
     size_t sum_len = 0;
 
-    token = mx_strtok(*result, MX_USH_TOK_DELIM);
+    token = mx_strtok(*result, _USH_TOK_DELIM);
 
     for (;token != NULL;) {
         len_token = strlen(token);
@@ -530,7 +530,7 @@ char *mx_subs_output(char **result) {
             strcat((tokens), token);
             sum_len += (len_token + 3);
         }
-        token = mx_strtok(NULL, MX_USH_TOK_DELIM);
+        token = mx_strtok(NULL, _USH_TOK_DELIM);
     }
 
     if (tokens)
@@ -562,7 +562,7 @@ char *subshell_parent(Prompt *shell, int *fd1, int *fd2, int pid) {
     }
 
     result[sum_read] = '\0';
-    waitpid(pid, &status, MX_WNOHANG | MX_WUNTRACED | MX_WCONTINUED);
+    waitpid(pid, &status, _WNOHANG | _WUNTRACED | _WCONTINUED);
     shell->exit_code = status;
     close(fd2[0]);
     
@@ -622,9 +622,9 @@ int mx_get_proc_count(Prompt *shell, int job_num, int filter) {
     }
 
     for (p_process = shell->jobs[job_num]->first_pr; p_process != NULL; p_process = p_process->next) {
-        if ((filter == MX_FILTER_DONE && p_process->status == MX_STATUS_DONE)
-        || (filter == MX_FILT_IN_PROGR && p_process->status != MX_STATUS_DONE)
-        || filter == MX_FILTER_ALL) {
+        if ((filter == _FILTER_DONE && p_process->status == _STATUS_DONE)
+        || (filter == _FILT_IN_PROGR && p_process->status != _STATUS_DONE)
+        || filter == _FILTER_ALL) {
             count++;
         }
     }
@@ -645,7 +645,7 @@ void mx_set_process_status(Prompt *shell, int pid, int status) {
         for (p_process = shell->jobs[i]->first_pr; p_process != NULL; p_process = p_process->next) {
             if (p_process->pid == pid) {
                 p_process->status = status;
-                if (status == MX_STATUS_SUSPENDED) {
+                if (status == _STATUS_SUSPENDED) {
                     if (shell->jobs_stack->last && shell->jobs_stack->prev_last) {
                         shell->jobs_stack->prev_last = shell->jobs_stack->last;
                     }

@@ -123,7 +123,7 @@ char *get_prefix(char *s, int *sleshpos) {
     int sp = -1;
 
     if (s[1]) {
-        sp = mx_get_char_index_quote(&s[1], "/", MX_QUOTE);
+        sp = mx_get_char_index_quote(&s[1], "/", _QUOTE);
         if (sp > 0)
             prefix = mx_strndup(&s[1], sp);
         else

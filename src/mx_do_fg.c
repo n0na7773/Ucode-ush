@@ -8,13 +8,13 @@ static int fg_send_signal(Prompt *shell, Process *proc, int pg_id, int job_num) 
 
     int stat;
     tcsetpgrp(STDIN_FILENO, pg_id);
-    mx_set_job_status(shell, job_num, MX_STATUS_CONTINUED);
+    mx_set_job_status(shell, job_num, _STATUS_CONTINUED);
     mx_print_job_status(shell, job_num, 0);
     stat = mx_wait_job(shell, job_num);
     if (mx_job_completed(shell, job_num)) mx_remove_job(shell, job_num);
-    signal(SIGTTOU, MX_SIG_IGN);
+    signal(SIGTTOU, _SIG_IGN);
     tcsetpgrp(STDIN_FILENO, getpid());
-    signal(SIGTTOU, MX_SIG_DFL);
+    signal(SIGTTOU, _SIG_DFL);
     tcgetattr(STDIN_FILENO, &shell->jobs[job_num]->tmodes);
     tcsetattr(STDIN_FILENO, TCSADRAIN, &shell->jobs[job_num]->tmodes);
     return stat;

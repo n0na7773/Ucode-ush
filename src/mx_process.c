@@ -107,7 +107,7 @@ int mx_launch_process(Prompt *shell, Process *p_process, int job_num) {
     int shell_is_interactive = isatty(STDIN_FILENO);
     pid_t child_pid;
 
-    p_process->status = MX_STATUS_RUNNING;
+    p_process->status = _STATUS_RUNNING;
     child_pid = fork();
 
     if (child_pid < 0) {
@@ -163,7 +163,7 @@ static Process *init_process(Abstract *list) {
 }
 
 static Process *create_process(Prompt *shell, Abstract *list) {
-    Abstract *t = list->left;
+    Abstract *t = list->prev;
     Process *process;
     int index = 0;
 
@@ -171,17 +171,17 @@ static Process *create_process(Prompt *shell, Abstract *list) {
         return NULL;
     }
 
-    if (list->left && (t->args = mx_filters(t->token, shell)) && *(t->args)) {
+    if (list->prev && (t->args = mx_filters(t->token, shell)) && *(t->args)) {
         process->redir_delim = t->type;
 
-        if (MX_IS_REDIR_INP(t->type)) {
+        if (_IS_REDIR_INP(t->type)) {
             process->input_path = mx_strdup(t->args[0]);
         }
-        else if (MX_IS_REDIR_OUTP(t->type)) {
+        else if (_IS_REDIR_OUTP(t->type)) {
             process->output_path = mx_strdup(t->args[0]);
         }
 
-        for (Abstract *q = list->left; q; q = q->next) {
+        for (Abstract *q = list->prev; q; q = q->next) {
             if (q->args || ((q->args = mx_filters(q->token, shell)) && *(q->args))) {
                 mx_redir_push_back(&process->redirect, q->args[0], q->type);
             }

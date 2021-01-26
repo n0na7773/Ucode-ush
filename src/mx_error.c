@@ -43,13 +43,13 @@ static bool check_quote(char *str) {
 static bool check_parse_auditor(char *line, int indx) {
     int i2, i3;
 
-    i2 = mx_get_char_index_quote(&line[indx + 1], MX_PARSE_DELIM, MX_QUOTE);
+    i2 = mx_get_char_index_quote(&line[indx + 1], _PARSE_DELIM, _QUOTE);
     if (i2 == 0) {
         if (line[indx] != line[indx + 1] || line[indx + 1] == ';'){
             return mx_parse_error(&line[indx + 1], 1);
         } else if (line[indx + 2]) {
             i3 = mx_get_char_index_quote(&line[indx + 2],
-                                         MX_PARSE_DELIM, MX_QUOTE);
+                                         _PARSE_DELIM, _QUOTE);
             if (i3 == 0)
                 return mx_parse_error(&line[indx + 2], 1);
         }
@@ -62,7 +62,7 @@ static bool check_parse(char *line) {
 
     while (line) {
         if ((i = mx_get_char_index_quote(line,
-            MX_PARSE_DELIM, MX_QUOTE)) >= 0) {
+            _PARSE_DELIM, _QUOTE)) >= 0) {
             if ((line[i + 1] == '\0' && line[i] != ';' && line[i] != '&') || mx_strcmp(&line[i], "&&") == 0)
                 return mx_parse_error("\\n", 2);
             if (line[i + 1])
@@ -88,9 +88,9 @@ bool mx_check_parce_errors(char *line) {
 }
 
 void mx_printerr_red(char *c) {
-    mx_printerr(MX_RED);
+    mx_printerr(_RED);
     mx_printerr(c);
-    mx_printerr(MX_RESET);
+    mx_printerr(_RESET);
 }
 
 void mx_sig_h(int signal) {
